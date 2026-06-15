@@ -2,8 +2,6 @@
 
 title: Customer Support Ticket Classifier
 
-emoji: 📨
-
 colorFrom: blue
 
 colorTo: indigo
