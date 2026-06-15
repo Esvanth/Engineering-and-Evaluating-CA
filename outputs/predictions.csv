@@ -1,0 +1,6 @@
+message_id,input_summary,y2_predicted,y2_confidence,y3_predicted,y3_confidence,y4_predicted,y4_confidence,model_name,model_version,prediction_timestamp_utc
+1,AppGallery update problem,Problem/Fault,0.4508,AppGallery-Install/Upgrade,0.4514,Other download/install/update issue,0.3592,random_forest+random_forest+random_forest,rf,2026-06-15T00:48:23+00:00
+2,Refund request,Suggestion,0.5786,Payment,0.5747,Subscription cancellation,0.5461,random_forest+random_forest+random_forest,rf,2026-06-15T00:48:23+00:00
+3,Login issue,Suggestion,0.558,Payment,0.6646,Subscription cancellation,0.8117,random_forest+random_forest+random_forest,rf,2026-06-15T00:48:23+00:00
+4,Subscription cancellation,Suggestion,0.5788,Payment,0.7454,Subscription cancellation,0.8581,random_forest+random_forest+random_forest,rf,2026-06-15T00:48:23+00:00
+5,General feedback,Suggestion,0.5502,Payment,0.7496,Subscription cancellation,0.8367,random_forest+random_forest+random_forest,rf,2026-06-15T00:48:23+00:00

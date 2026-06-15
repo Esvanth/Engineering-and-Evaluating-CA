@@ -1,0 +1,7 @@
+level,correct,broken_at_this_level,broken_at_earlier_level,not_applicable,applicable_total,level_accuracy,model
+y2,36,6,0,0,42,0.8571428571428571,rf
+y3,21,10,4,7,35,0.6,rf
+y4,20,0,12,10,32,0.625,rf
+y2,32,10,0,0,42,0.7619047619047619,lr
+y3,22,4,9,7,35,0.6285714285714286,lr
+y4,19,1,12,10,32,0.59375,lr

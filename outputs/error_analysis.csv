@@ -1,0 +1,21 @@
+model,ticket_id,message_excerpt,y2_true,y2_pred,y3_true,y3_pred,y4_true,y4_pred,y2_conf
+rf,23050,od: full refund from first day,Problem/Fault,Problem/Fault,Third Party APPs,VIP / Offers / Promotions,Refund,Offers / Vouchers / Promotions,0.533
+rf,24470,akcja company,Others,Suggestion,__MISSING__,Payment,__MISSING__,Subscription cancellation,0.641
+rf,23683,aspiegel support issue submit,Suggestion,Problem/Fault,VIP / Offers / Promotions,VIP / Offers / Promotions,Offers / Vouchers / Promotions,Offers / Vouchers / Promotions,0.477
+rf,23035,company support issue submit,Suggestion,Suggestion,Invoice,Payment issue,Invoice related request,Subscription cancellation,0.593
+rf,24496,résiliation de l’abonnement,Suggestion,Suggestion,Other,Payment,__MISSING__,Subscription cancellation,0.562
+rf,23624,gamecentre problems and suggestions,Problem/Fault,Suggestion,AppGallery-Install/Upgrade,AppGallery-Use,Can't download Apps,Others,0.551
+rf,22591,appgallery problemas y sugerencias,Problem/Fault,Problem/Fault,AppGallery-Use,Coupon/Gifts/Points Issues,UI Abnormal in Huawei AppGallery,Can't use or acquire,0.582
+rf,23740,ho pagato ma l applicazione non ha funzionato posso essere rimborsata grazie ho i paid but the application did not work ,Problem/Fault,Suggestion,Third Party APPs,Payment,Refund,Subscription cancellation,0.617
+rf,23028,vip privilege,Suggestion,Suggestion,Other,Payment,__MISSING__,Subscription cancellation,0.676
+rf,23012,appgallery problems and suggestions,Others,Problem/Fault,__MISSING__,AppGallery-Install/Upgrade,__MISSING__,Can't install Apps,0.5
+lr,23050,od: full refund from first day,Problem/Fault,Suggestion,Third Party APPs,Payment,Refund,Subscription cancellation,0.427
+lr,24470,akcja company,Others,Suggestion,__MISSING__,Payment,__MISSING__,Subscription cancellation,0.462
+lr,23188,appgallery проблеми и предложения,Suggestion,Others,General,General,Personal data,Personal data,0.659
+lr,23683,aspiegel support issue submit,Suggestion,Problem/Fault,VIP / Offers / Promotions,Coupon/Gifts/Points Issues,Offers / Vouchers / Promotions,Cooperated campaign issue,0.368
+lr,23040,company support issue submit,Suggestion,Problem/Fault,Payment,Payment issue,Subscription cancellation,Payment failed,0.396
+lr,23035,company support issue submit,Suggestion,Problem/Fault,Invoice,Payment issue,Invoice related request,Payment failed,0.472
+lr,24496,résiliation de l’abonnement,Suggestion,Suggestion,Other,Payment,__MISSING__,Subscription cancellation,0.495
+lr,23624,gamecentre problems and suggestions,Problem/Fault,Others,AppGallery-Install/Upgrade,General,Can't download Apps,Others,0.347
+lr,22591,appgallery problemas y sugerencias,Problem/Fault,Problem/Fault,AppGallery-Use,Coupon/Gifts/Points Issues,UI Abnormal in Huawei AppGallery,Can't use or acquire,0.564
+lr,23740,ho pagato ma l applicazione non ha funzionato posso essere rimborsata grazie ho i paid but the application did not work ,Problem/Fault,Suggestion,Third Party APPs,Payment,Refund,Subscription cancellation,0.429
