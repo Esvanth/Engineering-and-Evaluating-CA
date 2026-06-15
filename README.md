@@ -1,10 +1,11 @@
 ﻿---
 title: Customer Support Ticket Classifier
-emoji: 📨
+emoji: "📨"
 colorFrom: blue
 colorTo: indigo
 sdk: gradio
 sdk_version: 4.44.0
+python_version: "3.11"
 app_file: app.py
 pinned: false
 license: mit
@@ -26,6 +27,12 @@ Hierarchical multi-label classifier for customer-support tickets. Predicts three
 | Type 2 macro F1     | **0.833**     | 0.769               |
 | Type 3 macro F1     | 0.553         | 0.583               |
 | Type 4 macro F1     | 0.537         | 0.448               |
+
+## How to use
+
+Single message: type a ticket summary and content, hit Classify.
+
+Batch CSV: upload a CSV with `Ticket Summary` and `Interaction content` columns, get a predictions CSV back with confidence per level.
 
 ## Limitations
 
