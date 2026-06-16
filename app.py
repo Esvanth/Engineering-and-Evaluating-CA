@@ -1,14 +1,5 @@
 """
 Gradio app for the customer-support ticket classifier.
-
-Two tabs:
-  - Single message: type a ticket summary + content, get the three predicted
-    labels with confidence scores.
-  - Batch CSV: upload a CSV (same format as new_messages.csv), download a
-    predictions CSV.
-
-The app reuses the trained model that was saved by src.train, so the same
-chained accuracy reported in the report applies here.
 """
 from datetime import datetime, timezone
 from pathlib import Path
@@ -22,7 +13,6 @@ from src.models import ChainedHierarchicalClassifier
 from src.preprocessing import preprocess_message
 
 
-# Load model artefacts once at startup
 VECTORIZER = load_vectorizer(ARTIFACTS_DIR / ARTIFACTS.vectorizer)
 CLASSIFIER_RF = ChainedHierarchicalClassifier.load(
     ARTIFACTS_DIR / ARTIFACTS.classifier_template.format(model_name="rf")
@@ -33,9 +23,43 @@ CLASSIFIER_LR = ChainedHierarchicalClassifier.load(
 CLASSIFIERS = {"Random Forest": CLASSIFIER_RF, "Logistic Regression": CLASSIFIER_LR}
 
 
+def _conf_color(conf):
+    if conf >= 0.70:
+        return "#16a34a"
+    if conf >= 0.40:
+        return "#d97706"
+    return "#dc2626"
+
+
+def _result_card(level, sublabel, label, conf):
+    color = _conf_color(conf)
+    pct = f"{conf * 100:.0f}%"
+    return (
+        f'<div style="background:#ffffff;border:1px solid #e2e8f0;border-left:4px solid {color};'
+        f'border-radius:10px;padding:16px 20px;margin-bottom:10px;box-shadow:0 1px 3px rgba(0,0,0,.06);">'
+        f'<div style="font-size:10px;font-weight:700;color:#94a3b8;text-transform:uppercase;'
+        f'letter-spacing:.08em;margin-bottom:4px;">{level}</div>'
+        f'<div style="font-size:19px;font-weight:800;color:#1e293b;margin-bottom:2px;">{label}</div>'
+        f'<div style="font-size:12px;color:#64748b;margin-bottom:10px;">{sublabel}</div>'
+        f'<div style="display:flex;align-items:center;gap:10px;">'
+        f'<div style="flex:1;background:#f1f5f9;border-radius:99px;height:7px;overflow:hidden;">'
+        f'<div style="width:{pct};background:{color};height:7px;border-radius:99px;'
+        f'transition:width .4s ease;"></div></div>'
+        f'<span style="font-size:13px;font-weight:700;color:{color};min-width:42px;text-align:right;">'
+        f'{conf:.1%}</span></div></div>'
+    )
+
+
+EMPTY_CARD = (
+    '<div style="background:#f8fafc;border:1px dashed #cbd5e1;border-radius:10px;'
+    'padding:40px 20px;text-align:center;color:#94a3b8;font-size:14px;">'
+    'Predictions will appear here after you classify a ticket.</div>'
+)
+
+
 def classify_single(summary, content, model_choice):
-    if not summary and not content:
-        return "Please provide a ticket summary or content.", "", "", ""
+    if not summary.strip() and not content.strip():
+        return EMPTY_CARD, "", "", ""
 
     text = preprocess_message(summary or "", content or "")
     X = transform_texts(VECTORIZER, [text])
@@ -45,15 +69,15 @@ def classify_single(summary, content, model_choice):
     y2, y3, y4 = y_pred[0]
     c2, c3, c4 = confs[0]
 
-    def fmt(label, conf, level):
-        return f"### {level}\n**{label}**\n\nConfidence: `{conf:.2%}`"
-
-    return (
-        fmt(y2, c2, "Type 2 (top level)"),
-        fmt(y3, c3, "Type 3 (mid level)"),
-        fmt(y4, c4, "Type 4 (leaf level)"),
-        f"Model: {model_choice}  |  Predicted at {datetime.now(timezone.utc).isoformat(timespec='seconds')}",
+    c2_html = _result_card("Type 2 — Top-level category", "Overall request type", y2, c2)
+    c3_html = _result_card("Type 3 — Mid-level category", "Topic area", y3, c3)
+    c4_html = _result_card("Type 4 — Leaf-level category", "Specific issue", y4, c4)
+    stamp = (
+        f'<div style="font-size:11px;color:#94a3b8;padding:4px 2px;">'
+        f'Model: <b>{model_choice}</b> &nbsp;·&nbsp; '
+        f'{datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S")} UTC</div>'
     )
+    return c2_html, c3_html, c4_html, stamp
 
 
 REQUIRED_COLS = [COLUMNS.ticket_summary, COLUMNS.interaction_content]
@@ -61,18 +85,18 @@ REQUIRED_COLS = [COLUMNS.ticket_summary, COLUMNS.interaction_content]
 
 def classify_batch(csv_file, model_choice):
     if csv_file is None:
-        return None, "Please upload a CSV file."
+        return None, "Upload a CSV and click **Run Predictions**."
 
-    df = pd.read_csv(csv_file.name)
+    path = getattr(csv_file, "name", csv_file)
+    df = pd.read_csv(path)
     missing = [c for c in REQUIRED_COLS if c not in df.columns]
     if missing:
         return None, (
-            f"CSV is missing required columns: {missing}.\n"
-            f"Expected columns: {REQUIRED_COLS}.\n"
-            f"Found columns: {df.columns.tolist()}"
+            f"Missing required columns: `{missing}`.\n\n"
+            f"Expected: `{REQUIRED_COLS}`\n\nFound: `{df.columns.tolist()}`"
         )
     if df.empty:
-        return None, "CSV has no rows."
+        return None, "The uploaded CSV has no data rows."
 
     id_col = None
     for c in ("message_id", "row_id", COLUMNS.ticket_id, COLUMNS.interaction_id):
@@ -87,7 +111,6 @@ def classify_batch(csv_file, model_choice):
         preprocess_message(s, c)
         for s, c in zip(df[COLUMNS.ticket_summary], df[COLUMNS.interaction_content])
     ]
-
     X = transform_texts(VECTORIZER, texts)
     clf = CLASSIFIERS[model_choice]
     y_pred, confs = clf.predict_with_confidence(X)
@@ -108,72 +131,145 @@ def classify_batch(csv_file, model_choice):
 
     out_path = Path("/tmp/predictions.csv")
     out.to_csv(out_path, index=False)
-    return str(out_path), f"Predicted {len(out)} rows with {model_choice}. Download the CSV below."
+    return str(out_path), f"Done — **{len(out)} rows** predicted with **{model_choice}**. Download below."
 
 
-INTRO = """
-# Customer Support Ticket Classifier
-
-Hierarchical multi-label classifier that predicts three label levels for customer-support tickets:
-
-- **Type 2**: top-level category (Suggestion / Problem/Fault / Others)
-- **Type 3**: middle-level category (e.g. Payment, Refund, AppGallery-Install)
-- **Type 4**: leaf-level category (e.g. Subscription cancellation)
-
-> **Note on accuracy.** Trained on 206 customer-support tickets from the AppGallery and
-> In-App Purchase domains. Chained accuracy on the held-out test set is 0.69.
-> Predictions on text from very different domains will be unreliable.
+CSS = """
+.gradio-container { max-width: 980px !important; margin: 0 auto; font-family: 'Inter', sans-serif; }
+footer { display: none !important; }
+#page-header { text-align: center; padding: 24px 0 8px; }
+#classify-btn, #run-btn {
+    background: linear-gradient(90deg, #6366f1 0%, #8b5cf6 100%) !important;
+    color: #fff !important;
+    font-weight: 700 !important;
+    font-size: 15px !important;
+    border: none !important;
+    border-radius: 8px !important;
+    padding: 10px 0 !important;
+    transition: opacity .15s;
+}
+#classify-btn:hover, #run-btn:hover { opacity: .88 !important; }
+.metric-pill {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    padding: 14px 10px;
+    text-align: center;
+}
 """
 
-with gr.Blocks(title="Customer Support Ticket Classifier") as demo:
-    gr.Markdown(INTRO)
+with gr.Blocks(
+    title="Customer Support Ticket Classifier",
+    theme=gr.themes.Soft(
+        primary_hue=gr.themes.colors.violet,
+        secondary_hue=gr.themes.colors.sky,
+        neutral_hue=gr.themes.colors.slate,
+        font=gr.themes.GoogleFont("Inter"),
+    ),
+    css=CSS,
+) as demo:
 
-    with gr.Tab("Single message"):
+    gr.HTML("""
+    <div id="page-header">
+      <h1 style="font-size:2rem;font-weight:900;margin:0;background:linear-gradient(90deg,#6366f1,#8b5cf6);
+                 -webkit-background-clip:text;-webkit-text-fill-color:transparent;">
+        Customer Support Ticket Classifier
+      </h1>
+      <p style="color:#64748b;margin:8px 0 0;font-size:15px;">
+        Hierarchical prediction across three label levels using ML models trained on AppGallery support tickets
+      </p>
+    </div>
+    """)
+
+    with gr.Accordion("Model performance on held-out test set", open=False):
         with gr.Row():
-            with gr.Column():
-                summary_in = gr.Textbox(label="Ticket Summary",
-                                        placeholder="e.g. AppGallery update problem", lines=1)
-                content_in = gr.Textbox(label="Interaction content",
-                                        placeholder="e.g. The app store update keeps failing.",
-                                        lines=5)
-                model_single = gr.Radio(choices=list(CLASSIFIERS.keys()),
-                                        value="Random Forest", label="Model")
-                btn = gr.Button("Classify", variant="primary")
-            with gr.Column():
-                y2_out = gr.Markdown()
-                y3_out = gr.Markdown()
-                y4_out = gr.Markdown()
-                meta_out = gr.Markdown()
+            gr.HTML('<div class="metric-pill"><div style="font-size:22px;font-weight:800;color:#6366f1;">69.4%</div><div style="font-size:12px;color:#64748b;margin-top:2px;">Chained Accuracy (LR)</div></div>')
+            gr.HTML('<div class="metric-pill"><div style="font-size:22px;font-weight:800;color:#6366f1;">68.3%</div><div style="font-size:12px;color:#64748b;margin-top:2px;">Chained Accuracy (RF)</div></div>')
+            gr.HTML('<div class="metric-pill"><div style="font-size:22px;font-weight:800;color:#6366f1;">83.3%</div><div style="font-size:12px;color:#64748b;margin-top:2px;">Type 2 Macro F1 (RF)</div></div>')
+            gr.HTML('<div class="metric-pill"><div style="font-size:22px;font-weight:800;color:#6366f1;">206</div><div style="font-size:12px;color:#64748b;margin-top:2px;">Training samples</div></div>')
+        gr.Markdown(
+            "> **Heads up:** This is a research prototype trained on a small dataset. "
+            "Confidence scores below 50% indicate the model is uncertain — treat those predictions with caution.",
+            elem_id="disclaimer",
+        )
 
-        btn.click(classify_single,
-                  inputs=[summary_in, content_in, model_single],
-                  outputs=[y2_out, y3_out, y4_out, meta_out])
+    gr.HTML("<div style='height:8px'></div>")
 
-        gr.Examples(
-            examples=[
-                ["Refund request", "I paid for an app but it did not work. Please help me get a refund."],
-                ["Subscription cancellation", "I want to cancel my subscription and stop future payments."],
-                ["Login issue", "I cannot sign in to my account after changing my password."],
-            ],
-            inputs=[summary_in, content_in],
+    with gr.Tab("Single Message"):
+        with gr.Row(equal_height=False):
+            with gr.Column(scale=5):
+                summary_in = gr.Textbox(
+                    label="Ticket Summary",
+                    placeholder="e.g. AppGallery update keeps failing",
+                    lines=1,
+                )
+                content_in = gr.Textbox(
+                    label="Interaction Content",
+                    placeholder="Describe the customer's issue in detail…",
+                    lines=7,
+                )
+                with gr.Row():
+                    model_single = gr.Radio(
+                        choices=list(CLASSIFIERS.keys()),
+                        value="Random Forest",
+                        label="Model",
+                        scale=2,
+                    )
+                    btn = gr.Button(
+                        "Classify Ticket →",
+                        variant="primary",
+                        elem_id="classify-btn",
+                        scale=1,
+                    )
+
+                gr.Examples(
+                    examples=[
+                        ["Refund request", "I paid for an app but it did not work. Please help me get a refund."],
+                        ["Subscription cancellation", "I want to cancel my subscription and stop future payments."],
+                        ["Login issue", "I cannot sign in to my account after changing my password."],
+                    ],
+                    inputs=[summary_in, content_in],
+                    label="Examples — click to load",
+                )
+
+            with gr.Column(scale=5):
+                gr.HTML('<div style="font-size:13px;font-weight:600;color:#475569;margin-bottom:8px;">PREDICTION RESULTS</div>')
+                y2_out = gr.HTML(value=EMPTY_CARD)
+                y3_out = gr.HTML()
+                y4_out = gr.HTML()
+                meta_out = gr.HTML()
+
+        btn.click(
+            classify_single,
+            inputs=[summary_in, content_in, model_single],
+            outputs=[y2_out, y3_out, y4_out, meta_out],
         )
 
     with gr.Tab("Batch CSV"):
         gr.Markdown(
-            "Upload a CSV with `Ticket Summary` and `Interaction content` columns "
-            "(plus an optional `message_id`). Get a predictions CSV back with "
-            "confidence scores per level."
+            "Upload a CSV containing **`Ticket Summary`** and **`Interaction content`** columns. "
+            "An optional `message_id` column is preserved in the output. "
+            "Results include confidence scores for all three prediction levels."
         )
-        csv_in = gr.File(label="Upload CSV", file_types=[".csv"])
-        model_batch = gr.Radio(choices=list(CLASSIFIERS.keys()),
-                               value="Random Forest", label="Model")
-        run_btn = gr.Button("Run predictions", variant="primary")
-        status = gr.Markdown()
-        csv_out = gr.File(label="Predictions CSV")
+        gr.HTML("<div style='height:4px'></div>")
+        with gr.Row(equal_height=False):
+            with gr.Column(scale=4):
+                csv_in = gr.File(label="Upload CSV", file_types=[".csv"])
+                model_batch = gr.Radio(
+                    choices=list(CLASSIFIERS.keys()),
+                    value="Random Forest",
+                    label="Model",
+                )
+                run_btn = gr.Button("Run Predictions →", variant="primary", elem_id="run-btn")
+            with gr.Column(scale=6):
+                status = gr.Markdown(value="Upload a CSV and click **Run Predictions**.")
+                csv_out = gr.File(label="Download Predictions CSV")
 
-        run_btn.click(classify_batch,
-                      inputs=[csv_in, model_batch],
-                      outputs=[csv_out, status])
+        run_btn.click(
+            classify_batch,
+            inputs=[csv_in, model_batch],
+            outputs=[csv_out, status],
+        )
 
 
 if __name__ == "__main__":
