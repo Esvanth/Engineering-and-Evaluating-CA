@@ -517,7 +517,7 @@ with gr.Blocks(
 
         # ──── SINGLE TAB ────
         with gr.TabItem("Single Ticket", id="single"):
-            with gr.Row(equal_height=False, gap="md"):
+            with gr.Row(equal_height=False):
 
                 # left — inputs
                 with gr.Column(scale=5):
@@ -604,7 +604,7 @@ with gr.Blocks(
               </span>
             </div>
             """)
-            with gr.Row(equal_height=False, gap="md"):
+            with gr.Row(equal_height=False):
                 with gr.Column(scale=4):
                     with gr.Group(elem_classes="card"):
                         gr.HTML('<div class="card-title">Upload data</div>')
