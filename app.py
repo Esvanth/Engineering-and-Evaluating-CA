@@ -266,7 +266,7 @@ label span, .label-wrap span {
     font-weight: 500 !important;
     color: #5c5750 !important;
 }
-textarea, input[type=text] {
+textarea, input[type=text], input[type=email], input[type=number], .scroll-hide {
     font-family: 'Geist', sans-serif !important;
     font-size: 14px !important;
     color: #1a1816 !important;
@@ -279,8 +279,13 @@ textarea:focus, input[type=text]:focus {
     border-color: rgba(26,24,22,.35) !important;
     box-shadow: 0 0 0 3px rgba(26,24,22,.06) !important;
     outline: none !important;
+    background: #ffffff !important;
 }
 textarea::placeholder, input::placeholder { color: #c8c4be !important; }
+.dark textarea, .dark input[type=text], .dark .scroll-hide {
+    background: #faf9f7 !important;
+    color: #1a1816 !important;
+}
 
 /* ── radio ── */
 .radio-group { gap: 8px !important; }
@@ -381,7 +386,10 @@ textarea::placeholder, input::placeholder { color: #c8c4be !important; }
 
 with gr.Blocks(
     title="Support Ticket Classifier",
-    theme=gr.themes.Base(
+    theme=gr.themes.Soft(
+        primary_hue=gr.themes.colors.stone,
+        secondary_hue=gr.themes.colors.stone,
+        neutral_hue=gr.themes.colors.stone,
         font=gr.themes.GoogleFont("Geist"),
         font_mono=gr.themes.GoogleFont("DM Mono"),
     ),
