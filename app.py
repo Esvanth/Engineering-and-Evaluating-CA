@@ -266,7 +266,7 @@ label span, .label-wrap span {
     font-weight: 500 !important;
     color: #5c5750 !important;
 }
-textarea, input[type=text] {
+textarea, input[type=text], input[type=email], input[type=number], .scroll-hide {
     font-family: 'Geist', sans-serif !important;
     font-size: 14px !important;
     color: #1a1816 !important;
@@ -279,8 +279,13 @@ textarea:focus, input[type=text]:focus {
     border-color: rgba(26,24,22,.35) !important;
     box-shadow: 0 0 0 3px rgba(26,24,22,.06) !important;
     outline: none !important;
+    background: #ffffff !important;
 }
 textarea::placeholder, input::placeholder { color: #c8c4be !important; }
+.dark textarea, .dark input[type=text], .dark .scroll-hide {
+    background: #faf9f7 !important;
+    color: #1a1816 !important;
+}
 
 /* ── radio ── */
 .radio-group { gap: 8px !important; }
@@ -381,7 +386,10 @@ textarea::placeholder, input::placeholder { color: #c8c4be !important; }
 
 with gr.Blocks(
     title="Support Ticket Classifier",
-    theme=gr.themes.Base(
+    theme=gr.themes.Soft(
+        primary_hue=gr.themes.colors.stone,
+        secondary_hue=gr.themes.colors.stone,
+        neutral_hue=gr.themes.colors.stone,
         font=gr.themes.GoogleFont("Geist"),
         font_mono=gr.themes.GoogleFont("DM Mono"),
     ),
@@ -391,14 +399,6 @@ with gr.Blocks(
     # ── hero ─────────────────────────────────────────────────────────────────
     gr.HTML("""
     <div style="padding: 40px 0 28px; border-bottom: 1.5px solid rgba(26,24,22,.08); margin-bottom: 28px;">
-      <div style="font-family:'DM Mono',monospace;font-size:11px;color:#9c9590;
-                  text-transform:uppercase;letter-spacing:.1em;margin-bottom:12px;">
-        MSc AI Engineering &amp; Evaluating AI Systems
-      </div>
-      <h1 style="font-family:'Instrument Serif',serif;font-size:clamp(28px,3.6vw,42px);
-                 font-weight:400;color:#1a1816;margin:0 0 10px;letter-spacing:-.02em;line-height:1.15;">
-        Customer Support<br><em>Ticket Classifier</em>
-      </h1>
       <p style="font-family:'Geist',sans-serif;font-size:15px;color:#5c5750;
                 margin:0;max-width:520px;line-height:1.65;font-weight:300;">
         Hierarchical multi-label classification across three label levels —
@@ -530,13 +530,6 @@ with gr.Blocks(
                 outputs=[csv_out, status],
             )
 
-    gr.HTML("""
-    <div style="text-align:center;padding:32px 0 0;font-family:'DM Mono',monospace;
-                font-size:11px;color:#c8c4be;letter-spacing:.06em;
-                border-top:1px solid rgba(26,24,22,.07);margin-top:32px;">
-      HIERARCHICAL CLASSIFIER · SCIKIT-LEARN · NCI DUBLIN
-    </div>
-    """)
 
 
 if __name__ == "__main__":
