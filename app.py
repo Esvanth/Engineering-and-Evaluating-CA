@@ -391,14 +391,6 @@ with gr.Blocks(
     # ── hero ─────────────────────────────────────────────────────────────────
     gr.HTML("""
     <div style="padding: 40px 0 28px; border-bottom: 1.5px solid rgba(26,24,22,.08); margin-bottom: 28px;">
-      <div style="font-family:'DM Mono',monospace;font-size:11px;color:#9c9590;
-                  text-transform:uppercase;letter-spacing:.1em;margin-bottom:12px;">
-        MSc AI Engineering &amp; Evaluating AI Systems
-      </div>
-      <h1 style="font-family:'Instrument Serif',serif;font-size:clamp(28px,3.6vw,42px);
-                 font-weight:400;color:#1a1816;margin:0 0 10px;letter-spacing:-.02em;line-height:1.15;">
-        Customer Support<br><em>Ticket Classifier</em>
-      </h1>
       <p style="font-family:'Geist',sans-serif;font-size:15px;color:#5c5750;
                 margin:0;max-width:520px;line-height:1.65;font-weight:300;">
         Hierarchical multi-label classification across three label levels —
@@ -530,13 +522,6 @@ with gr.Blocks(
                 outputs=[csv_out, status],
             )
 
-    gr.HTML("""
-    <div style="text-align:center;padding:32px 0 0;font-family:'DM Mono',monospace;
-                font-size:11px;color:#c8c4be;letter-spacing:.06em;
-                border-top:1px solid rgba(26,24,22,.07);margin-top:32px;">
-      HIERARCHICAL CLASSIFIER · SCIKIT-LEARN · NCI DUBLIN
-    </div>
-    """)
 
 
 if __name__ == "__main__":
