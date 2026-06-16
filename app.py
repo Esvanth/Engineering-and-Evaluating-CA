@@ -562,7 +562,6 @@ with gr.Blocks(
                             ],
                             inputs=[summary_in, content_in],
                             label="Try an example",
-                            elem_classes="examples-wrap",
                         )
 
                 # right — results
