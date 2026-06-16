@@ -33,27 +33,41 @@ def _conf_color(conf):
 
 def _result_card(level, sublabel, label, conf):
     color = _conf_color(conf)
+    bg = {"#16a34a": "#f0fdf4", "#d97706": "#fffbeb", "#dc2626": "#fef2f2"}[color]
+    badge_bg = {"#16a34a": "#dcfce7", "#d97706": "#fef3c7", "#dc2626": "#fee2e2"}[color]
     pct = f"{conf * 100:.0f}%"
+    conf_label = "High confidence" if conf >= 0.70 else "Medium confidence" if conf >= 0.40 else "Low confidence"
     return (
-        f'<div style="background:#ffffff;border:1px solid #e2e8f0;border-left:4px solid {color};'
-        f'border-radius:10px;padding:16px 20px;margin-bottom:10px;box-shadow:0 1px 3px rgba(0,0,0,.06);">'
+        f'<div style="background:#fff;border:1px solid #e2e8f0;border-radius:12px;'
+        f'padding:18px 20px;margin-bottom:12px;'
+        f'box-shadow:0 2px 8px rgba(0,0,0,.06),0 0 0 1px rgba(0,0,0,.03);">'
+        f'<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px;">'
+        f'<div>'
         f'<div style="font-size:10px;font-weight:700;color:#94a3b8;text-transform:uppercase;'
-        f'letter-spacing:.08em;margin-bottom:4px;">{level}</div>'
-        f'<div style="font-size:19px;font-weight:800;color:#1e293b;margin-bottom:2px;">{label}</div>'
-        f'<div style="font-size:12px;color:#64748b;margin-bottom:10px;">{sublabel}</div>'
-        f'<div style="display:flex;align-items:center;gap:10px;">'
-        f'<div style="flex:1;background:#f1f5f9;border-radius:99px;height:7px;overflow:hidden;">'
-        f'<div style="width:{pct};background:{color};height:7px;border-radius:99px;'
-        f'transition:width .4s ease;"></div></div>'
-        f'<span style="font-size:13px;font-weight:700;color:{color};min-width:42px;text-align:right;">'
-        f'{conf:.1%}</span></div></div>'
+        f'letter-spacing:.09em;margin-bottom:5px;">{level}</div>'
+        f'<div style="font-size:18px;font-weight:800;color:#0f172a;line-height:1.2;">{label}</div>'
+        f'<div style="font-size:12px;color:#64748b;margin-top:3px;">{sublabel}</div>'
+        f'</div>'
+        f'<div style="background:{badge_bg};color:{color};font-size:12px;font-weight:700;'
+        f'padding:5px 10px;border-radius:99px;white-space:nowrap;margin-left:12px;margin-top:2px;">'
+        f'{conf:.1%}</div>'
+        f'</div>'
+        f'<div style="display:flex;align-items:center;gap:8px;">'
+        f'<div style="flex:1;background:#f1f5f9;border-radius:99px;height:6px;overflow:hidden;">'
+        f'<div style="width:{pct};background:linear-gradient(90deg,{color}cc,{color});'
+        f'height:6px;border-radius:99px;transition:width .5s ease;"></div></div>'
+        f'<span style="font-size:11px;color:#94a3b8;white-space:nowrap;">{conf_label}</span>'
+        f'</div></div>'
     )
 
 
 EMPTY_CARD = (
-    '<div style="background:#f8fafc;border:1px dashed #cbd5e1;border-radius:10px;'
-    'padding:40px 20px;text-align:center;color:#94a3b8;font-size:14px;">'
-    'Predictions will appear here after you classify a ticket.</div>'
+    '<div style="background:#f8fafc;border:1px dashed #cbd5e1;border-radius:12px;'
+    'padding:52px 24px;text-align:center;">'
+    '<div style="font-size:36px;margin-bottom:12px;">🎯</div>'
+    '<div style="font-size:15px;font-weight:600;color:#475569;margin-bottom:6px;">No prediction yet</div>'
+    '<div style="font-size:13px;color:#94a3b8;">Fill in the ticket details on the left and click <b>Classify Ticket</b>.</div>'
+    '</div>'
 )
 
 
@@ -135,26 +149,40 @@ def classify_batch(csv_file, model_choice):
 
 
 CSS = """
-.gradio-container { max-width: 980px !important; margin: 0 auto; font-family: 'Inter', sans-serif; }
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
+.gradio-container { max-width: 1000px !important; margin: 0 auto !important; font-family: 'Inter', sans-serif !important; }
 footer { display: none !important; }
-#page-header { text-align: center; padding: 24px 0 8px; }
+#page-header { text-align: center; padding: 28px 0 10px; }
 #classify-btn, #run-btn {
-    background: linear-gradient(90deg, #6366f1 0%, #8b5cf6 100%) !important;
+    background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%) !important;
     color: #fff !important;
     font-weight: 700 !important;
     font-size: 15px !important;
     border: none !important;
-    border-radius: 8px !important;
-    padding: 10px 0 !important;
-    transition: opacity .15s;
+    border-radius: 10px !important;
+    box-shadow: 0 4px 14px rgba(99,102,241,.35) !important;
+    transition: box-shadow .2s, transform .15s !important;
 }
-#classify-btn:hover, #run-btn:hover { opacity: .88 !important; }
+#classify-btn:hover, #run-btn:hover {
+    box-shadow: 0 6px 20px rgba(99,102,241,.5) !important;
+    transform: translateY(-1px) !important;
+}
 .metric-pill {
-    background: #f8fafc;
+    background: linear-gradient(135deg,#f8fafc 0%,#f1f5f9 100%);
     border: 1px solid #e2e8f0;
-    border-radius: 10px;
-    padding: 14px 10px;
+    border-radius: 12px;
+    padding: 16px 10px;
     text-align: center;
+    box-shadow: 0 1px 4px rgba(0,0,0,.04);
+}
+.tab-nav button { font-weight: 600 !important; font-size: 14px !important; }
+.result-label {
+    font-size: 11px; font-weight: 700; color: #94a3b8;
+    text-transform: uppercase; letter-spacing: .08em; margin-bottom: 10px;
+    display: flex; align-items: center; gap: 6px;
+}
+.result-label::after {
+    content: ''; flex: 1; height: 1px; background: #e2e8f0;
 }
 """
 
@@ -171,26 +199,36 @@ with gr.Blocks(
 
     gr.HTML("""
     <div id="page-header">
-      <h1 style="font-size:2rem;font-weight:900;margin:0;background:linear-gradient(90deg,#6366f1,#8b5cf6);
-                 -webkit-background-clip:text;-webkit-text-fill-color:transparent;">
+      <div style="display:inline-flex;align-items:center;gap:10px;background:linear-gradient(135deg,#ede9fe,#dbeafe);
+                  border-radius:99px;padding:6px 16px;font-size:12px;font-weight:600;color:#6366f1;
+                  margin-bottom:14px;letter-spacing:.03em;">
+        &#x1F4CA; MSc AI Engineering &amp; Evaluating AI Systems
+      </div>
+      <h1 style="font-size:2.1rem;font-weight:900;margin:0 0 10px;
+                 background:linear-gradient(135deg,#4f46e5 0%,#7c3aed 50%,#a855f7 100%);
+                 -webkit-background-clip:text;-webkit-text-fill-color:transparent;line-height:1.15;">
         Customer Support Ticket Classifier
       </h1>
-      <p style="color:#64748b;margin:8px 0 0;font-size:15px;">
-        Hierarchical prediction across three label levels using ML models trained on AppGallery support tickets
+      <p style="color:#64748b;margin:0;font-size:15px;max-width:560px;margin:0 auto;line-height:1.6;">
+        Hierarchical multi-label classifier that predicts <strong style="color:#6366f1;">three label levels</strong>
+        for customer-support tickets using Random Forest &amp; Logistic Regression.
       </p>
+      <div style="height:1px;background:linear-gradient(90deg,transparent,#e2e8f0,transparent);margin:20px 0 4px;"></div>
     </div>
     """)
 
-    with gr.Accordion("Model performance on held-out test set", open=False):
+    with gr.Accordion("Model performance on held-out test set (42 rows)", open=False):
         with gr.Row():
-            gr.HTML('<div class="metric-pill"><div style="font-size:22px;font-weight:800;color:#6366f1;">69.4%</div><div style="font-size:12px;color:#64748b;margin-top:2px;">Chained Accuracy (LR)</div></div>')
-            gr.HTML('<div class="metric-pill"><div style="font-size:22px;font-weight:800;color:#6366f1;">68.3%</div><div style="font-size:12px;color:#64748b;margin-top:2px;">Chained Accuracy (RF)</div></div>')
-            gr.HTML('<div class="metric-pill"><div style="font-size:22px;font-weight:800;color:#6366f1;">83.3%</div><div style="font-size:12px;color:#64748b;margin-top:2px;">Type 2 Macro F1 (RF)</div></div>')
-            gr.HTML('<div class="metric-pill"><div style="font-size:22px;font-weight:800;color:#6366f1;">206</div><div style="font-size:12px;color:#64748b;margin-top:2px;">Training samples</div></div>')
-        gr.Markdown(
-            "> **Heads up:** This is a research prototype trained on a small dataset. "
-            "Confidence scores below 50% indicate the model is uncertain — treat those predictions with caution.",
-            elem_id="disclaimer",
+            gr.HTML('<div class="metric-pill"><div style="font-size:24px;font-weight:900;color:#6366f1;letter-spacing:-.5px;">69.4%</div><div style="font-size:11px;font-weight:600;color:#64748b;margin-top:3px;">Chained Accuracy</div><div style="font-size:10px;color:#94a3b8;">Logistic Regression</div></div>')
+            gr.HTML('<div class="metric-pill"><div style="font-size:24px;font-weight:900;color:#6366f1;letter-spacing:-.5px;">68.3%</div><div style="font-size:11px;font-weight:600;color:#64748b;margin-top:3px;">Chained Accuracy</div><div style="font-size:10px;color:#94a3b8;">Random Forest</div></div>')
+            gr.HTML('<div class="metric-pill"><div style="font-size:24px;font-weight:900;color:#16a34a;letter-spacing:-.5px;">83.3%</div><div style="font-size:11px;font-weight:600;color:#64748b;margin-top:3px;">Type 2 Macro F1</div><div style="font-size:10px;color:#94a3b8;">Random Forest</div></div>')
+            gr.HTML('<div class="metric-pill"><div style="font-size:24px;font-weight:900;color:#d97706;letter-spacing:-.5px;">206</div><div style="font-size:11px;font-weight:600;color:#64748b;margin-top:3px;">Training Samples</div><div style="font-size:10px;color:#94a3b8;">AppGallery domain</div></div>')
+        gr.HTML(
+            '<div style="background:#fefce8;border:1px solid #fde68a;border-radius:8px;padding:10px 14px;'
+            'font-size:13px;color:#92400e;margin-top:4px;">'
+            '&#9888;&#65039; <strong>Research prototype</strong> — trained on a small dataset. '
+            'Confidence scores below 50% mean the model is uncertain; treat those predictions with caution.'
+            '</div>'
         )
 
     gr.HTML("<div style='height:8px'></div>")
@@ -233,11 +271,22 @@ with gr.Blocks(
                 )
 
             with gr.Column(scale=5):
-                gr.HTML('<div style="font-size:13px;font-weight:600;color:#475569;margin-bottom:8px;">PREDICTION RESULTS</div>')
+                gr.HTML('<div class="result-label">Prediction Results</div>')
                 y2_out = gr.HTML(value=EMPTY_CARD)
                 y3_out = gr.HTML()
                 y4_out = gr.HTML()
                 meta_out = gr.HTML()
+                gr.HTML(
+                    '<div style="display:flex;gap:14px;margin-top:4px;padding:10px 14px;'
+                    'background:#f8fafc;border-radius:8px;border:1px solid #f1f5f9;">'
+                    '<span style="font-size:11px;color:#64748b;display:flex;align-items:center;gap:5px;">'
+                    '<span style="width:10px;height:10px;border-radius:50%;background:#16a34a;display:inline-block;"></span>≥ 70% High</span>'
+                    '<span style="font-size:11px;color:#64748b;display:flex;align-items:center;gap:5px;">'
+                    '<span style="width:10px;height:10px;border-radius:50%;background:#d97706;display:inline-block;"></span>40–70% Medium</span>'
+                    '<span style="font-size:11px;color:#64748b;display:flex;align-items:center;gap:5px;">'
+                    '<span style="width:10px;height:10px;border-radius:50%;background:#dc2626;display:inline-block;"></span>< 40% Low</span>'
+                    '</div>'
+                )
 
         btn.click(
             classify_single,
