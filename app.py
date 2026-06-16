@@ -23,52 +23,83 @@ CLASSIFIER_LR = ChainedHierarchicalClassifier.load(
 CLASSIFIERS = {"Random Forest": CLASSIFIER_RF, "Logistic Regression": CLASSIFIER_LR}
 
 
-def _conf_color(conf):
+# ── visual helpers ──────────────────────────────────────────────────────────
+
+PALETTE = {
+    "high":   {"fg": "#15803d", "bg": "#f0fdf4", "bar": "#22c55e", "badge": "#dcfce7"},
+    "mid":    {"fg": "#b45309", "bg": "#fffbeb", "bar": "#f59e0b", "badge": "#fef3c7"},
+    "low":    {"fg": "#b91c1c", "bg": "#fef2f2", "bar": "#ef4444", "badge": "#fee2e2"},
+}
+
+LEVEL_META = {
+    "Type 2": {"icon": "📂", "subtitle": "Top-level category"},
+    "Type 3": {"icon": "📌", "subtitle": "Mid-level topic"},
+    "Type 4": {"icon": "🏷️", "subtitle": "Specific issue"},
+}
+
+
+def _tier(conf):
     if conf >= 0.70:
-        return "#16a34a"
+        return PALETTE["high"], "High"
     if conf >= 0.40:
-        return "#d97706"
-    return "#dc2626"
+        return PALETTE["mid"], "Medium"
+    return PALETTE["low"], "Low"
 
 
-def _result_card(level, sublabel, label, conf):
-    color = _conf_color(conf)
-    bg = {"#16a34a": "#f0fdf4", "#d97706": "#fffbeb", "#dc2626": "#fef2f2"}[color]
-    badge_bg = {"#16a34a": "#dcfce7", "#d97706": "#fef3c7", "#dc2626": "#fee2e2"}[color]
-    pct = f"{conf * 100:.0f}%"
-    conf_label = "High confidence" if conf >= 0.70 else "Medium confidence" if conf >= 0.40 else "Low confidence"
-    return (
-        f'<div style="background:#fff;border:1px solid #e2e8f0;border-radius:12px;'
-        f'padding:18px 20px;margin-bottom:12px;'
-        f'box-shadow:0 2px 8px rgba(0,0,0,.06),0 0 0 1px rgba(0,0,0,.03);">'
-        f'<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px;">'
-        f'<div>'
-        f'<div style="font-size:10px;font-weight:700;color:#94a3b8;text-transform:uppercase;'
-        f'letter-spacing:.09em;margin-bottom:5px;">{level}</div>'
-        f'<div style="font-size:18px;font-weight:800;color:#0f172a;line-height:1.2;">{label}</div>'
-        f'<div style="font-size:12px;color:#64748b;margin-top:3px;">{sublabel}</div>'
-        f'</div>'
-        f'<div style="background:{badge_bg};color:{color};font-size:12px;font-weight:700;'
-        f'padding:5px 10px;border-radius:99px;white-space:nowrap;margin-left:12px;margin-top:2px;">'
-        f'{conf:.1%}</div>'
-        f'</div>'
-        f'<div style="display:flex;align-items:center;gap:8px;">'
-        f'<div style="flex:1;background:#f1f5f9;border-radius:99px;height:6px;overflow:hidden;">'
-        f'<div style="width:{pct};background:linear-gradient(90deg,{color}cc,{color});'
-        f'height:6px;border-radius:99px;transition:width .5s ease;"></div></div>'
-        f'<span style="font-size:11px;color:#94a3b8;white-space:nowrap;">{conf_label}</span>'
-        f'</div></div>'
-    )
+def _result_card(level_key, label, conf):
+    p, word = _tier(conf)
+    meta = LEVEL_META[level_key]
+    pct = f"{conf * 100:.1f}"
+    return f"""
+    <div style="
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-left: 4px solid {p['bar']};
+        border-radius: 10px;
+        padding: 16px 20px;
+        margin-bottom: 10px;
+        transition: box-shadow .2s;
+    " onmouseenter="this.style.boxShadow='0 4px 16px rgba(0,0,0,.07)'"
+       onmouseleave="this.style.boxShadow='none'">
+
+      <!-- header row -->
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+        <div style="display:flex;align-items:center;gap:8px;">
+          <span style="font-size:20px;">{meta['icon']}</span>
+          <div>
+            <div style="font-size:10px;font-weight:700;color:#94a3b8;text-transform:uppercase;
+                        letter-spacing:.06em;">{level_key} — {meta['subtitle']}</div>
+            <div style="font-size:17px;font-weight:800;color:#1e293b;margin-top:2px;">{label}</div>
+          </div>
+        </div>
+        <div style="background:{p['badge']};color:{p['fg']};font-size:13px;font-weight:700;
+                    padding:4px 12px;border-radius:99px;white-space:nowrap;">{pct}%</div>
+      </div>
+
+      <!-- progress bar -->
+      <div style="display:flex;align-items:center;gap:10px;">
+        <div style="flex:1;background:#f1f5f9;border-radius:99px;height:5px;overflow:hidden;">
+          <div style="width:{pct}%;background:{p['bar']};height:5px;border-radius:99px;
+                      transition:width .4s ease;"></div>
+        </div>
+        <span style="font-size:10px;font-weight:600;color:{p['fg']};white-space:nowrap;">{word}</span>
+      </div>
+    </div>
+    """
 
 
-EMPTY_CARD = (
-    '<div style="background:#f8fafc;border:1px dashed #cbd5e1;border-radius:12px;'
-    'padding:52px 24px;text-align:center;">'
-    '<div style="font-size:36px;margin-bottom:12px;">🎯</div>'
-    '<div style="font-size:15px;font-weight:600;color:#475569;margin-bottom:6px;">No prediction yet</div>'
-    '<div style="font-size:13px;color:#94a3b8;">Fill in the ticket details on the left and click <b>Classify Ticket</b>.</div>'
-    '</div>'
-)
+EMPTY_CARD = """
+<div style="background:#f8fafc;border:2px dashed #cbd5e1;border-radius:14px;
+            padding:56px 24px;text-align:center;">
+  <div style="font-size:40px;margin-bottom:14px;">🎯</div>
+  <div style="font-size:16px;font-weight:700;color:#475569;margin-bottom:6px;">
+    Awaiting your ticket
+  </div>
+  <div style="font-size:13px;color:#94a3b8;max-width:280px;margin:0 auto;line-height:1.5;">
+    Enter a summary and description on the left, then press <b>Classify</b>.
+  </div>
+</div>
+"""
 
 
 def classify_single(summary, content, model_choice):
@@ -83,16 +114,23 @@ def classify_single(summary, content, model_choice):
     y2, y3, y4 = y_pred[0]
     c2, c3, c4 = confs[0]
 
-    c2_html = _result_card("Type 2 — Top-level category", "Overall request type", y2, c2)
-    c3_html = _result_card("Type 3 — Mid-level category", "Topic area", y3, c3)
-    c4_html = _result_card("Type 4 — Leaf-level category", "Specific issue", y4, c4)
+    cards = (
+        _result_card("Type 2", y2, c2),
+        _result_card("Type 3", y3, c3),
+        _result_card("Type 4", y4, c4),
+    )
     stamp = (
-        f'<div style="font-size:11px;color:#94a3b8;padding:4px 2px;">'
+        f'<div style="font-size:11px;color:#94a3b8;padding:6px 4px;display:flex;'
+        f'align-items:center;gap:6px;">'
+        f'<span style="display:inline-block;width:6px;height:6px;border-radius:50%;'
+        f'background:#22c55e;"></span>'
         f'Model: <b>{model_choice}</b> &nbsp;·&nbsp; '
         f'{datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S")} UTC</div>'
     )
-    return c2_html, c3_html, c4_html, stamp
+    return *cards, stamp
 
+
+# ── batch mode ──────────────────────────────────────────────────────────────
 
 REQUIRED_COLS = [COLUMNS.ticket_summary, COLUMNS.interaction_content]
 
@@ -148,92 +186,188 @@ def classify_batch(csv_file, model_choice):
     return str(out_path), f"Done — **{len(out)} rows** predicted with **{model_choice}**. Download below."
 
 
+# ── UI ──────────────────────────────────────────────────────────────────────
+
 CSS = """
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
-.gradio-container { max-width: 1000px !important; margin: 0 auto !important; font-family: 'Inter', sans-serif !important; }
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500&display=swap');
+
+/* ── globals ── */
+.gradio-container {
+    max-width: 1020px !important;
+    margin: 0 auto !important;
+    font-family: 'Inter', system-ui, sans-serif !important;
+    background: #f8fafc !important;
+}
+.dark .gradio-container { background: #0f172a !important; }
 footer { display: none !important; }
-#page-header { text-align: center; padding: 28px 0 10px; }
+
+/* ── tab strip ── */
+.tab-nav { border-bottom: 2px solid #e2e8f0 !important; }
+.tab-nav button {
+    font-weight: 600 !important;
+    font-size: 13px !important;
+    letter-spacing: .02em !important;
+    padding: 10px 18px !important;
+    border-radius: 8px 8px 0 0 !important;
+}
+.tab-nav button.selected {
+    background: #fff !important;
+    border-bottom: 2px solid #6366f1 !important;
+    color: #6366f1 !important;
+}
+
+/* ── primary buttons ── */
 #classify-btn, #run-btn {
-    background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%) !important;
+    background: #6366f1 !important;
     color: #fff !important;
     font-weight: 700 !important;
-    font-size: 15px !important;
+    font-size: 14px !important;
     border: none !important;
-    border-radius: 10px !important;
-    box-shadow: 0 4px 14px rgba(99,102,241,.35) !important;
-    transition: box-shadow .2s, transform .15s !important;
+    border-radius: 8px !important;
+    padding: 10px 22px !important;
+    box-shadow: 0 1px 3px rgba(99,102,241,.25) !important;
+    transition: background .15s, box-shadow .15s !important;
+    letter-spacing: .01em !important;
 }
 #classify-btn:hover, #run-btn:hover {
-    box-shadow: 0 6px 20px rgba(99,102,241,.5) !important;
-    transform: translateY(-1px) !important;
+    background: #4f46e5 !important;
+    box-shadow: 0 4px 14px rgba(99,102,241,.35) !important;
 }
-.metric-pill {
-    background: linear-gradient(135deg,#f8fafc 0%,#f1f5f9 100%);
+
+/* ── inputs ── */
+.gradio-container textarea, .gradio-container input[type="text"] {
+    border-radius: 8px !important;
+    border: 1px solid #e2e8f0 !important;
+    font-size: 14px !important;
+    transition: border-color .15s !important;
+}
+.gradio-container textarea:focus, .gradio-container input[type="text"]:focus {
+    border-color: #6366f1 !important;
+    box-shadow: 0 0 0 3px rgba(99,102,241,.12) !important;
+}
+
+/* ── metric cards ── */
+.stat-card {
+    background: #fff;
     border: 1px solid #e2e8f0;
-    border-radius: 12px;
-    padding: 16px 10px;
+    border-radius: 10px;
+    padding: 18px 14px;
     text-align: center;
-    box-shadow: 0 1px 4px rgba(0,0,0,.04);
 }
-.tab-nav button { font-weight: 600 !important; font-size: 14px !important; }
-.result-label {
-    font-size: 11px; font-weight: 700; color: #94a3b8;
-    text-transform: uppercase; letter-spacing: .08em; margin-bottom: 10px;
-    display: flex; align-items: center; gap: 6px;
+.stat-val {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 26px;
+    font-weight: 700;
+    letter-spacing: -.5px;
 }
-.result-label::after {
-    content: ''; flex: 1; height: 1px; background: #e2e8f0;
+.stat-label {
+    font-size: 11px;
+    font-weight: 600;
+    color: #64748b;
+    margin-top: 4px;
 }
+.stat-sub {
+    font-size: 10px;
+    color: #94a3b8;
+    margin-top: 2px;
+}
+
+/* ── legend chips ── */
+.legend-row {
+    display: flex; gap: 16px; margin-top: 6px;
+    padding: 8px 14px; background: #f8fafc;
+    border-radius: 8px; border: 1px solid #f1f5f9;
+}
+.legend-chip {
+    font-size: 11px; color: #64748b;
+    display: flex; align-items: center; gap: 5px;
+}
+.legend-dot {
+    width: 8px; height: 8px; border-radius: 50%; display: inline-block;
+}
+
+/* ── accordion ── */
+.gradio-accordion { border-radius: 10px !important; border: 1px solid #e2e8f0 !important; }
 """
 
 with gr.Blocks(
     title="Customer Support Ticket Classifier",
     theme=gr.themes.Soft(
-        primary_hue=gr.themes.colors.violet,
-        secondary_hue=gr.themes.colors.sky,
+        primary_hue=gr.themes.colors.indigo,
+        secondary_hue=gr.themes.colors.slate,
         neutral_hue=gr.themes.colors.slate,
         font=gr.themes.GoogleFont("Inter"),
     ),
     css=CSS,
 ) as demo:
 
+    # ── header ──
     gr.HTML("""
-    <div id="page-header">
-      <div style="display:inline-flex;align-items:center;gap:10px;background:linear-gradient(135deg,#ede9fe,#dbeafe);
-                  border-radius:99px;padding:6px 16px;font-size:12px;font-weight:600;color:#6366f1;
-                  margin-bottom:14px;letter-spacing:.03em;">
-        &#x1F4CA; MSc AI Engineering &amp; Evaluating AI Systems
+    <div style="text-align:center;padding:32px 0 8px;">
+
+      <div style="display:inline-flex;align-items:center;gap:6px;
+                  background:#eef2ff;border:1px solid #c7d2fe;border-radius:99px;
+                  padding:5px 14px;font-size:11px;font-weight:600;color:#4f46e5;
+                  letter-spacing:.03em;margin-bottom:16px;">
+        <span style="font-size:14px;">🎓</span>
+        MSc AI · Engineering &amp; Evaluating AI Systems
       </div>
-      <h1 style="font-size:2.1rem;font-weight:900;margin:0 0 10px;
-                 background:linear-gradient(135deg,#4f46e5 0%,#7c3aed 50%,#a855f7 100%);
-                 -webkit-background-clip:text;-webkit-text-fill-color:transparent;line-height:1.15;">
-        Customer Support Ticket Classifier
+
+      <h1 style="font-size:2rem;font-weight:900;margin:0 0 8px;color:#0f172a;
+                 line-height:1.15;letter-spacing:-.02em;">
+        Support Ticket Classifier
       </h1>
-      <p style="color:#64748b;margin:0;font-size:15px;max-width:560px;margin:0 auto;line-height:1.6;">
-        Hierarchical multi-label classifier that predicts <strong style="color:#6366f1;">three label levels</strong>
-        for customer-support tickets using Random Forest &amp; Logistic Regression.
+
+      <p style="color:#64748b;margin:0 auto;font-size:14px;max-width:500px;line-height:1.6;">
+        Hierarchical model that predicts <strong style="color:#4f46e5;">three category levels</strong>
+        for customer-support tickets — powered by Random Forest &amp; Logistic Regression.
       </p>
-      <div style="height:1px;background:linear-gradient(90deg,transparent,#e2e8f0,transparent);margin:20px 0 4px;"></div>
+
+      <div style="height:1px;background:linear-gradient(90deg,transparent 0%,#e2e8f0 30%,#e2e8f0 70%,transparent 100%);
+                  margin:22px auto 0;max-width:600px;"></div>
     </div>
     """)
 
+    # ── metrics accordion ──
     with gr.Accordion("Model performance on held-out test set (42 rows)", open=False):
         with gr.Row():
-            gr.HTML('<div class="metric-pill"><div style="font-size:24px;font-weight:900;color:#6366f1;letter-spacing:-.5px;">69.4%</div><div style="font-size:11px;font-weight:600;color:#64748b;margin-top:3px;">Chained Accuracy</div><div style="font-size:10px;color:#94a3b8;">Logistic Regression</div></div>')
-            gr.HTML('<div class="metric-pill"><div style="font-size:24px;font-weight:900;color:#6366f1;letter-spacing:-.5px;">68.3%</div><div style="font-size:11px;font-weight:600;color:#64748b;margin-top:3px;">Chained Accuracy</div><div style="font-size:10px;color:#94a3b8;">Random Forest</div></div>')
-            gr.HTML('<div class="metric-pill"><div style="font-size:24px;font-weight:900;color:#16a34a;letter-spacing:-.5px;">83.3%</div><div style="font-size:11px;font-weight:600;color:#64748b;margin-top:3px;">Type 2 Macro F1</div><div style="font-size:10px;color:#94a3b8;">Random Forest</div></div>')
-            gr.HTML('<div class="metric-pill"><div style="font-size:24px;font-weight:900;color:#d97706;letter-spacing:-.5px;">206</div><div style="font-size:11px;font-weight:600;color:#64748b;margin-top:3px;">Training Samples</div><div style="font-size:10px;color:#94a3b8;">AppGallery domain</div></div>')
+            gr.HTML(
+                '<div class="stat-card">'
+                '<div class="stat-val" style="color:#6366f1;">69.4%</div>'
+                '<div class="stat-label">Chained Accuracy</div>'
+                '<div class="stat-sub">Logistic Regression</div></div>'
+            )
+            gr.HTML(
+                '<div class="stat-card">'
+                '<div class="stat-val" style="color:#6366f1;">68.3%</div>'
+                '<div class="stat-label">Chained Accuracy</div>'
+                '<div class="stat-sub">Random Forest</div></div>'
+            )
+            gr.HTML(
+                '<div class="stat-card">'
+                '<div class="stat-val" style="color:#15803d;">83.3%</div>'
+                '<div class="stat-label">Type 2 Macro F1</div>'
+                '<div class="stat-sub">Random Forest</div></div>'
+            )
+            gr.HTML(
+                '<div class="stat-card">'
+                '<div class="stat-val" style="color:#b45309;">206</div>'
+                '<div class="stat-label">Training Samples</div>'
+                '<div class="stat-sub">AppGallery domain</div></div>'
+            )
         gr.HTML(
-            '<div style="background:#fefce8;border:1px solid #fde68a;border-radius:8px;padding:10px 14px;'
-            'font-size:13px;color:#92400e;margin-top:4px;">'
-            '&#9888;&#65039; <strong>Research prototype</strong> — trained on a small dataset. '
-            'Confidence scores below 50% mean the model is uncertain; treat those predictions with caution.'
+            '<div style="background:#fffbeb;border:1px solid #fde68a;border-radius:8px;'
+            'padding:10px 14px;font-size:12px;color:#92400e;margin-top:6px;line-height:1.5;">'
+            '⚠️ <strong>Research prototype</strong> — trained on a small dataset. '
+            'Predictions with confidence below 50 % should be treated with caution.'
             '</div>'
         )
 
-    gr.HTML("<div style='height:8px'></div>")
+    gr.HTML("<div style='height:6px'></div>")
 
-    with gr.Tab("Single Message"):
+    # ── single ticket ──
+    with gr.Tab("Single Ticket"):
         with gr.Row(equal_height=False):
             with gr.Column(scale=5):
                 summary_in = gr.Textbox(
@@ -254,37 +388,41 @@ with gr.Blocks(
                         scale=2,
                     )
                     btn = gr.Button(
-                        "Classify Ticket →",
+                        "Classify →",
                         variant="primary",
                         elem_id="classify-btn",
                         scale=1,
                     )
-
                 gr.Examples(
                     examples=[
-                        ["Refund request", "I paid for an app but it did not work. Please help me get a refund."],
-                        ["Subscription cancellation", "I want to cancel my subscription and stop future payments."],
-                        ["Login issue", "I cannot sign in to my account after changing my password."],
+                        ["Refund request",
+                         "I paid for an app but it did not work. Please help me get a refund."],
+                        ["Subscription cancellation",
+                         "I want to cancel my subscription and stop future payments."],
+                        ["Login issue",
+                         "I cannot sign in to my account after changing my password."],
                     ],
                     inputs=[summary_in, content_in],
-                    label="Examples — click to load",
+                    label="Try an example",
                 )
 
             with gr.Column(scale=5):
-                gr.HTML('<div class="result-label">Prediction Results</div>')
+                gr.HTML(
+                    '<div style="font-size:11px;font-weight:700;color:#94a3b8;'
+                    'text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px;'
+                    'display:flex;align-items:center;gap:8px;">'
+                    'Prediction Results'
+                    '<span style="flex:1;height:1px;background:#e2e8f0;"></span></div>'
+                )
                 y2_out = gr.HTML(value=EMPTY_CARD)
                 y3_out = gr.HTML()
                 y4_out = gr.HTML()
                 meta_out = gr.HTML()
                 gr.HTML(
-                    '<div style="display:flex;gap:14px;margin-top:4px;padding:10px 14px;'
-                    'background:#f8fafc;border-radius:8px;border:1px solid #f1f5f9;">'
-                    '<span style="font-size:11px;color:#64748b;display:flex;align-items:center;gap:5px;">'
-                    '<span style="width:10px;height:10px;border-radius:50%;background:#16a34a;display:inline-block;"></span>≥ 70% High</span>'
-                    '<span style="font-size:11px;color:#64748b;display:flex;align-items:center;gap:5px;">'
-                    '<span style="width:10px;height:10px;border-radius:50%;background:#d97706;display:inline-block;"></span>40–70% Medium</span>'
-                    '<span style="font-size:11px;color:#64748b;display:flex;align-items:center;gap:5px;">'
-                    '<span style="width:10px;height:10px;border-radius:50%;background:#dc2626;display:inline-block;"></span>< 40% Low</span>'
+                    '<div class="legend-row">'
+                    '<span class="legend-chip"><span class="legend-dot" style="background:#22c55e;"></span>≥ 70 % High</span>'
+                    '<span class="legend-chip"><span class="legend-dot" style="background:#f59e0b;"></span>40–70 % Medium</span>'
+                    '<span class="legend-chip"><span class="legend-dot" style="background:#ef4444;"></span>&lt; 40 % Low</span>'
                     '</div>'
                 )
 
@@ -294,6 +432,7 @@ with gr.Blocks(
             outputs=[y2_out, y3_out, y4_out, meta_out],
         )
 
+    # ── batch csv ──
     with gr.Tab("Batch CSV"):
         gr.Markdown(
             "Upload a CSV containing **`Ticket Summary`** and **`Interaction content`** columns. "
@@ -309,7 +448,9 @@ with gr.Blocks(
                     value="Random Forest",
                     label="Model",
                 )
-                run_btn = gr.Button("Run Predictions →", variant="primary", elem_id="run-btn")
+                run_btn = gr.Button(
+                    "Run Predictions →", variant="primary", elem_id="run-btn",
+                )
             with gr.Column(scale=6):
                 status = gr.Markdown(value="Upload a CSV and click **Run Predictions**.")
                 csv_out = gr.File(label="Download Predictions CSV")
