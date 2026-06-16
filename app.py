@@ -23,18 +23,18 @@ CLASSIFIER_LR = ChainedHierarchicalClassifier.load(
 CLASSIFIERS = {"Random Forest": CLASSIFIER_RF, "Logistic Regression": CLASSIFIER_LR}
 
 
-# ── visual helpers ──────────────────────────────────────────────────────────
+# ── visual helpers ───────────────────────────────────────────────────────────
 
 PALETTE = {
-    "high": {"fg": "#065f46", "bg": "#ecfdf5", "bar": "#059669", "badge": "#d1fae5"},
-    "mid": {"fg": "#92400e", "bg": "#fffbeb", "bar": "#d97706", "badge": "#fef3c7"},
-    "low": {"fg": "#991b1b", "bg": "#fef2f2", "bar": "#dc2626", "badge": "#fee2e2"},
+    "high": {"fg": "#15803d", "bg": "#f0fdf4", "bar": "#22c55e", "badge": "#dcfce7", "border": "rgba(21,128,61,.25)"},
+    "mid":  {"fg": "#b45309", "bg": "#fffbeb", "bar": "#f59e0b", "badge": "#fef3c7", "border": "rgba(180,83,9,.25)"},
+    "low":  {"fg": "#b91c1c", "bg": "#fef2f2", "bar": "#ef4444", "badge": "#fee2e2", "border": "rgba(185,28,28,.25)"},
 }
 
 LEVEL_META = {
-    "Type 2": {"icon": "📁", "subtitle": "Category"},
-    "Type 3": {"icon": "📌", "subtitle": "Topic"},
-    "Type 4": {"icon": "🏷️", "subtitle": "Issue"},
+    "Type 2": {"label": "Type 2", "subtitle": "Top-level category"},
+    "Type 3": {"label": "Type 3", "subtitle": "Mid-level topic"},
+    "Type 4": {"label": "Type 4", "subtitle": "Specific issue type"},
 }
 
 
@@ -51,50 +51,45 @@ def _result_card(level_key, label, conf):
     meta = LEVEL_META[level_key]
     pct = f"{conf * 100:.1f}"
     return f"""
-    <div style="
-        background: #ffffff;
-        border: 1px solid #e5e7eb;
-        border-left: 4px solid {p['bar']};
-        border-radius: 10px;
-        padding: 14px 18px;
-        margin-bottom: 8px;
-        transition: box-shadow .2s;
-    ">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
-        <div style="display:flex;align-items:center;gap:8px;">
-          <span style="font-size:18px;">{meta['icon']}</span>
-          <div>
-            <div style="font-size:10px;font-weight:600;color:#9ca3af;text-transform:uppercase;
-                        letter-spacing:.04em;">{meta['subtitle']}</div>
-            <div style="font-size:15px;font-weight:700;color:#1f2937;margin-top:1px;">{label}</div>
-          </div>
-        </div>
-        <div style="background:{p['badge']};color:{p['fg']};font-size:12px;font-weight:700;
-                    padding:3px 12px;border-radius:99px;white-space:nowrap;">{pct}%</div>
+<div style="background:#ffffff;border:1px solid {p['border']};border-left:3px solid {p['bar']};
+     border-radius:12px;padding:18px 20px;margin-bottom:10px;
+     box-shadow:0 1px 3px rgba(26,24,22,.06),0 4px 16px rgba(26,24,22,.04);">
+  <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:12px;">
+    <div>
+      <div style="font-size:10px;font-weight:600;color:#9c9590;text-transform:uppercase;
+                  letter-spacing:.08em;margin-bottom:4px;font-family:'DM Mono',monospace;">
+        {meta['label']} — {meta['subtitle']}
       </div>
-      <div style="display:flex;align-items:center;gap:8px;">
-        <div style="flex:1;background:#f3f4f6;border-radius:99px;height:4px;overflow:hidden;">
-          <div style="width:{pct}%;background:{p['bar']};height:4px;border-radius:99px;
-                      transition:width .4s ease;"></div>
-        </div>
-        <span style="font-size:9px;font-weight:600;color:{p['fg']};white-space:nowrap;">{word}</span>
-      </div>
+      <div style="font-size:17px;font-weight:700;color:#1a1816;letter-spacing:-.01em;">{label}</div>
     </div>
-    """
+    <div style="background:{p['badge']};color:{p['fg']};font-size:12px;font-weight:700;
+                padding:4px 12px;border-radius:99px;white-space:nowrap;margin-left:12px;margin-top:2px;
+                font-family:'DM Mono',monospace;">{pct}%</div>
+  </div>
+  <div style="display:flex;align-items:center;gap:10px;">
+    <div style="flex:1;background:#efece8;border-radius:99px;height:5px;overflow:hidden;">
+      <div style="width:{pct}%;background:{p['bar']};height:5px;border-radius:99px;
+                  transition:width .6s cubic-bezier(.4,0,.2,1);"></div>
+    </div>
+    <span style="font-size:10px;font-weight:600;color:{p['fg']};white-space:nowrap;
+                 font-family:'DM Mono',monospace;">{word} confidence</span>
+  </div>
+</div>"""
 
 
 EMPTY_CARD = """
-<div style="background:#fafafa;border:2px dashed #d1d5db;border-radius:12px;
-            padding:48px 20px;text-align:center;">
-  <div style="font-size:36px;margin-bottom:12px;">📬</div>
-  <div style="font-size:15px;font-weight:600;color:#4b5563;margin-bottom:4px;">
+<div style="background:#f7f5f0;border:1.5px dashed #c8c4be;border-radius:14px;
+            padding:52px 24px;text-align:center;">
+  <div style="width:44px;height:44px;background:#efece8;border-radius:12px;margin:0 auto 16px;
+              display:flex;align-items:center;justify-content:center;font-size:22px;">📋</div>
+  <div style="font-size:15px;font-weight:600;color:#1a1816;margin-bottom:6px;
+              font-family:'Instrument Serif',serif;font-style:italic;">
     No ticket analysed yet
   </div>
-  <div style="font-size:12px;color:#9ca3af;max-width:260px;margin:0 auto;line-height:1.5;">
-    Enter a summary and description, then click <strong>Analyse</strong>.
+  <div style="font-size:13px;color:#9c9590;max-width:240px;margin:0 auto;line-height:1.6;">
+    Fill in the ticket details and press <strong style="color:#5c5750;">Analyse</strong>.
   </div>
-</div>
-"""
+</div>"""
 
 
 def classify_single(summary, content, model_choice):
@@ -109,24 +104,18 @@ def classify_single(summary, content, model_choice):
     y2, y3, y4 = y_pred[0]
     c2, c3, c4 = confs[0]
 
-    cards = (
-        _result_card("Type 2", y2, c2),
-        _result_card("Type 3", y3, c3),
-        _result_card("Type 4", y4, c4),
-    )
     stamp = (
-        f'<div style="font-size:11px;color:#9ca3af;padding:4px 2px;display:flex;'
-        f'align-items:center;gap:6px;">'
+        f'<div style="font-size:11px;color:#9c9590;padding:4px 2px;display:flex;'
+        f'align-items:center;gap:6px;font-family:\'DM Mono\',monospace;">'
         f'<span style="display:inline-block;width:6px;height:6px;border-radius:50%;'
-        f'background:#059669;"></span>'
-        f'<span style="font-weight:500;">{model_choice}</span>'
-        f'&nbsp;·&nbsp; '
+        f'background:#22c55e;flex-shrink:0;"></span>'
+        f'{model_choice} &nbsp;·&nbsp; '
         f'{datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S")} UTC</div>'
     )
-    return *cards, stamp
+    return _result_card("Type 2", y2, c2), _result_card("Type 3", y3, c3), _result_card("Type 4", y4, c4), stamp
 
 
-# ── batch mode ──────────────────────────────────────────────────────────────
+# ── batch ────────────────────────────────────────────────────────────────────
 
 REQUIRED_COLS = [COLUMNS.ticket_summary, COLUMNS.interaction_content]
 
@@ -140,8 +129,7 @@ def classify_batch(csv_file, model_choice):
     missing = [c for c in REQUIRED_COLS if c not in df.columns]
     if missing:
         return None, (
-            f"Missing required columns: `{missing}`.\n\n"
-            f"Expected: `{REQUIRED_COLS}`\n\nFound: `{df.columns.tolist()}`"
+            f"Missing columns: `{missing}`.\n\nExpected: `{REQUIRED_COLS}`\n\nFound: `{df.columns.tolist()}`"
         )
     if df.empty:
         return None, "The uploaded CSV has no data rows."
@@ -179,411 +167,323 @@ def classify_batch(csv_file, model_choice):
 
     out_path = Path("/tmp/predictions.csv")
     out.to_csv(out_path, index=False)
-    return str(out_path), f"✅ **{len(out)} rows** processed with **{model_choice}**. Download the results below."
+    return str(out_path), f"Done — **{len(out)} rows** classified with **{model_choice}**. Download below."
 
 
-# ── UI ──────────────────────────────────────────────────────────────────────
+# ── CSS ──────────────────────────────────────────────────────────────────────
 
 CSS = """
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Geist:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap');
+
+*, *::before, *::after { box-sizing: border-box; }
 
 .gradio-container {
-    max-width: 1100px !important;
+    max-width: 1040px !important;
     margin: 0 auto !important;
-    font-family: 'Inter', -apple-system, system-ui, sans-serif !important;
-    background: #f8fafc !important;
+    font-family: 'Geist', system-ui, sans-serif !important;
+    background: #f7f5f0 !important;
+    padding: 0 24px 48px !important;
 }
-.dark .gradio-container { background: #0f172a !important; }
 footer { display: none !important; }
 
-/* ── header ── */
-.app-header {
-    background: #ffffff;
-    border-radius: 16px;
-    padding: 24px 32px;
-    margin-bottom: 20px;
-    border: 1px solid #e5e7eb;
-    box-shadow: 0 1px 3px rgba(0,0,0,.04);
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    flex-wrap: wrap;
-    gap: 12px;
-}
-.app-brand {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-}
-.app-brand .logo {
-    width: 40px;
-    height: 40px;
-    background: #4f46e5;
-    border-radius: 10px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: #fff;
-    font-size: 18px;
-    font-weight: 700;
-}
-.app-brand h1 {
-    font-size: 20px;
-    font-weight: 800;
-    color: #0f172a;
-    margin: 0;
-    letter-spacing: -.02em;
-}
-.app-brand .tagline {
-    font-size: 12px;
-    color: #64748b;
-    font-weight: 400;
-    margin-left: 4px;
-}
-.app-badge {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    background: #f1f5f9;
-    padding: 6px 16px;
-    border-radius: 99px;
-    font-size: 12px;
-    font-weight: 500;
-    color: #334155;
-}
-.app-badge .dot {
-    width: 6px;
-    height: 6px;
-    border-radius: 50%;
-    background: #22c55e;
-    display: inline-block;
-}
-
-/* ── tabs ── */
-.tabs {
-    border: none !important;
+/* ── nav tabs ── */
+.tab-nav {
+    background: transparent !important;
+    border-bottom: 1.5px solid rgba(26,24,22,.1) !important;
+    padding: 0 !important;
     gap: 0 !important;
 }
-.tabs > .tab-nav {
-    border-bottom: 2px solid #e5e7eb !important;
-    background: transparent !important;
-    padding: 0 !important;
-}
-.tabs > .tab-nav button {
-    font-weight: 600 !important;
+.tab-nav button {
+    font-family: 'Geist', sans-serif !important;
+    font-weight: 500 !important;
     font-size: 13px !important;
-    letter-spacing: .01em !important;
-    padding: 12px 20px !important;
-    border-radius: 0 !important;
+    color: #9c9590 !important;
     background: transparent !important;
-    color: #64748b !important;
-    border-bottom: 2px solid transparent !important;
-    margin-bottom: -2px !important;
-    transition: all .15s !important;
-}
-.tabs > .tab-nav button:hover {
-    color: #1f2937 !important;
-    background: transparent !important;
-}
-.tabs > .tab-nav button.selected {
-    color: #4f46e5 !important;
-    border-bottom: 2px solid #4f46e5 !important;
-    background: transparent !important;
-}
-.tabs > .tab-panel {
-    padding: 20px 0 0 0 !important;
     border: none !important;
+    border-bottom: 2px solid transparent !important;
+    padding: 12px 18px !important;
+    margin-bottom: -1.5px !important;
+    border-radius: 0 !important;
+    transition: color .15s !important;
 }
+.tab-nav button:hover { color: #1a1816 !important; }
+.tab-nav button.selected {
+    color: #1a1816 !important;
+    border-bottom-color: #1a1816 !important;
+    font-weight: 600 !important;
+}
+.tabitem { padding-top: 24px !important; border: none !important; }
 
-/* ── cards ── */
-.card {
+/* ── surface cards ── */
+.surface {
     background: #ffffff;
-    border-radius: 12px;
-    border: 1px solid #e5e7eb;
-    padding: 20px 24px;
-    box-shadow: 0 1px 2px rgba(0,0,0,.03);
+    border: 1px solid rgba(26,24,22,.09);
+    border-radius: 14px;
+    padding: 24px 26px;
+    box-shadow: 0 1px 3px rgba(26,24,22,.06), 0 4px 16px rgba(26,24,22,.04);
 }
-.card-title {
-    font-size: 13px;
-    font-weight: 600;
-    color: #64748b;
+.section-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    font-weight: 500;
+    color: #9c9590;
     text-transform: uppercase;
-    letter-spacing: .04em;
+    letter-spacing: .1em;
     margin-bottom: 14px;
 }
+.divider {
+    height: 1px;
+    background: rgba(26,24,22,.07);
+    margin: 16px 0;
+}
 
-/* ── buttons ── */
-.btn-primary {
-    background: #4f46e5 !important;
-    color: #fff !important;
+/* ── primary button ── */
+button.primary, .run-btn button, #analyse-btn {
+    background: #1a1816 !important;
+    color: #f7f5f0 !important;
+    font-family: 'Geist', sans-serif !important;
     font-weight: 600 !important;
     font-size: 14px !important;
     border: none !important;
-    border-radius: 8px !important;
-    padding: 10px 24px !important;
-    transition: all .15s !important;
-    min-height: 44px !important;
-    box-shadow: 0 1px 2px rgba(79,70,229,.15) !important;
+    border-radius: 9px !important;
+    padding: 11px 24px !important;
+    width: 100% !important;
+    transition: opacity .15s !important;
+    cursor: pointer !important;
+    letter-spacing: .01em !important;
 }
-.btn-primary:hover {
-    background: #4338ca !important;
-    box-shadow: 0 4px 12px rgba(79,70,229,.25) !important;
-    transform: translateY(-1px);
+button.primary:hover, .run-btn button:hover, #analyse-btn:hover {
+    opacity: .87 !important;
 }
-.btn-primary:active {
-    transform: translateY(0);
+button.primary:active, #analyse-btn:active {
+    transform: scale(.99) !important;
 }
 
 /* ── inputs ── */
-.gradio-container textarea,
-.gradio-container input[type="text"],
-.gradio-container input[type="file"] {
-    border-radius: 8px !important;
-    border: 1px solid #e5e7eb !important;
-    font-size: 14px !important;
-    font-family: 'Inter', sans-serif !important;
-    transition: border-color .15s, box-shadow .15s !important;
-    background: #ffffff !important;
-}
-.gradio-container textarea:focus,
-.gradio-container input[type="text"]:focus {
-    border-color: #4f46e5 !important;
-    box-shadow: 0 0 0 3px rgba(79,70,229,.08) !important;
-    outline: none !important;
-}
-.gradio-container textarea::placeholder,
-.gradio-container input[type="text"]::placeholder {
-    color: #9ca3af !important;
-}
-
-/* ── radio ── */
-.gradio-container .radio-group {
-    background: #f8fafc !important;
-    border-radius: 8px !important;
-    padding: 4px !important;
-    border: 1px solid #e5e7eb !important;
-}
-.gradio-container .radio-group label {
-    padding: 6px 14px !important;
-    border-radius: 6px !important;
+label span, .label-wrap span {
+    font-family: 'Geist', sans-serif !important;
     font-size: 13px !important;
     font-weight: 500 !important;
-    color: #64748b !important;
-    transition: all .15s !important;
-    cursor: pointer !important;
+    color: #5c5750 !important;
 }
-.gradio-container .radio-group label.selected {
-    background: #ffffff !important;
-    color: #1f2937 !important;
-    box-shadow: 0 1px 3px rgba(0,0,0,.06) !important;
+textarea, input[type=text] {
+    font-family: 'Geist', sans-serif !important;
+    font-size: 14px !important;
+    color: #1a1816 !important;
+    background: #faf9f7 !important;
+    border: 1px solid rgba(26,24,22,.12) !important;
+    border-radius: 8px !important;
+    transition: border-color .15s, box-shadow .15s !important;
+}
+textarea:focus, input[type=text]:focus {
+    border-color: rgba(26,24,22,.35) !important;
+    box-shadow: 0 0 0 3px rgba(26,24,22,.06) !important;
+    outline: none !important;
+}
+textarea::placeholder, input::placeholder { color: #c8c4be !important; }
+
+/* ── radio ── */
+.radio-group { gap: 8px !important; }
+.radio-group label {
+    font-family: 'Geist', sans-serif !important;
+    font-size: 13px !important;
+    font-weight: 500 !important;
+    color: #5c5750 !important;
+    background: #f7f5f0 !important;
+    border: 1px solid rgba(26,24,22,.12) !important;
+    border-radius: 7px !important;
+    padding: 7px 14px !important;
+    cursor: pointer !important;
+    transition: all .15s !important;
+}
+.radio-group label:hover { border-color: rgba(26,24,22,.25) !important; }
+.radio-group input:checked + label, .radio-group label.selected {
+    background: #1a1816 !important;
+    color: #f7f5f0 !important;
+    border-color: #1a1816 !important;
 }
 
 /* ── examples ── */
-.examples-wrap {
-    margin-top: 12px;
-}
-.examples-wrap .examples-table {
-    border: 1px solid #e5e7eb !important;
-    border-radius: 8px !important;
-    overflow: hidden !important;
-}
-.examples-wrap .examples-table td {
-    padding: 8px 14px !important;
+.examples-table { border-radius: 8px !important; overflow: hidden !important; }
+.examples-table td {
+    font-family: 'Geist', sans-serif !important;
     font-size: 13px !important;
-    color: #1f2937 !important;
+    color: #1a1816 !important;
+    padding: 8px 14px !important;
+    background: #faf9f7 !important;
+    border-color: rgba(26,24,22,.08) !important;
     cursor: pointer !important;
     transition: background .1s !important;
 }
-.examples-wrap .examples-table td:hover {
-    background: #f1f5f9 !important;
-}
-.examples-wrap .examples-table .example-label {
-    color: #64748b !important;
-    font-size: 11px !important;
-    font-weight: 600 !important;
-    text-transform: uppercase !important;
-    letter-spacing: .04em !important;
-    background: #f8fafc !important;
-}
+.examples-table tr:hover td { background: #efece8 !important; }
 
-/* ── results panel ── */
-.results-panel {
+/* ── stat grid ── */
+.stat-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+    margin-bottom: 24px;
+}
+.stat-box {
     background: #ffffff;
+    border: 1px solid rgba(26,24,22,.09);
     border-radius: 12px;
-    border: 1px solid #e5e7eb;
-    padding: 20px 22px;
-    min-height: 280px;
+    padding: 16px;
+    text-align: center;
+    box-shadow: 0 1px 3px rgba(26,24,22,.04);
 }
-.results-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 14px;
+.stat-num {
+    font-family: 'Instrument Serif', serif;
+    font-size: 26px;
+    color: #1a1816;
+    margin-bottom: 2px;
 }
-.results-header .title {
-    font-size: 13px;
-    font-weight: 600;
-    color: #64748b;
+.stat-lbl {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    color: #9c9590;
     text-transform: uppercase;
-    letter-spacing: .04em;
-}
-.results-header .badge {
-    font-size: 11px;
-    color: #9ca3af;
+    letter-spacing: .07em;
 }
 
 /* ── legend ── */
-.legend {
+.conf-legend {
     display: flex;
-    gap: 14px;
-    padding: 10px 16px;
-    background: #f8fafc;
+    gap: 16px;
+    padding: 10px 14px;
+    background: #f7f5f0;
     border-radius: 8px;
-    border: 1px solid #f1f5f9;
-    margin-top: 10px;
+    border: 1px solid rgba(26,24,22,.07);
+    margin-top: 8px;
     flex-wrap: wrap;
 }
-.legend-item {
+.conf-legend span {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: #5c5750;
     display: flex;
     align-items: center;
     gap: 6px;
-    font-size: 11px;
-    color: #64748b;
 }
-.legend-dot {
-    width: 8px;
-    height: 8px;
+.conf-legend i {
+    width: 8px; height: 8px;
     border-radius: 50%;
     display: inline-block;
+    flex-shrink: 0;
 }
 
-/* ── batch status ── */
-.batch-status {
-    background: #f8fafc;
-    border-radius: 8px;
-    padding: 14px 18px;
-    border: 1px solid #e5e7eb;
-    font-size: 14px;
-    color: #1f2937;
-    min-height: 52px;
-}
-
-/* ── responsive ── */
 @media (max-width: 640px) {
-    .app-header {
-        flex-direction: column;
-        align-items: stretch;
-        text-align: center;
-    }
-    .app-brand {
-        justify-content: center;
-    }
-    .app-badge {
-        justify-content: center;
-    }
+    .stat-grid { grid-template-columns: repeat(2, 1fr); }
 }
 """
 
+# ── layout ───────────────────────────────────────────────────────────────────
+
 with gr.Blocks(
     title="Support Ticket Classifier",
-    theme=gr.themes.Soft(
-        primary_hue=gr.themes.colors.indigo,
-        secondary_hue=gr.themes.colors.slate,
-        neutral_hue=gr.themes.colors.slate,
-        font=gr.themes.GoogleFont("Inter"),
+    theme=gr.themes.Base(
+        font=gr.themes.GoogleFont("Geist"),
+        font_mono=gr.themes.GoogleFont("DM Mono"),
     ),
     css=CSS,
 ) as demo:
 
-    # ── header ──
+    # ── hero ─────────────────────────────────────────────────────────────────
     gr.HTML("""
-    <div class="app-header">
-      <div class="app-brand">
-        <div class="logo">✦</div>
-        <div>
-          <h1>Ticket Classifier</h1>
-          <span class="tagline">Hierarchical support ticket analysis</span>
-        </div>
+    <div style="padding: 40px 0 28px; border-bottom: 1.5px solid rgba(26,24,22,.08); margin-bottom: 28px;">
+      <div style="font-family:'DM Mono',monospace;font-size:11px;color:#9c9590;
+                  text-transform:uppercase;letter-spacing:.1em;margin-bottom:12px;">
+        MSc AI Engineering &amp; Evaluating AI Systems
       </div>
-      <div class="app-badge">
-        <span class="dot"></span>
-        <span>Random Forest · Logistic Regression</span>
+      <h1 style="font-family:'Instrument Serif',serif;font-size:clamp(28px,3.6vw,42px);
+                 font-weight:400;color:#1a1816;margin:0 0 10px;letter-spacing:-.02em;line-height:1.15;">
+        Customer Support<br><em>Ticket Classifier</em>
+      </h1>
+      <p style="font-family:'Geist',sans-serif;font-size:15px;color:#5c5750;
+                margin:0;max-width:520px;line-height:1.65;font-weight:300;">
+        Hierarchical multi-label classification across three label levels —
+        using Random Forest and Logistic Regression trained on AppGallery support tickets.
+      </p>
+    </div>
+
+    <div class="stat-grid">
+      <div class="stat-box">
+        <div class="stat-num">69.4%</div>
+        <div class="stat-lbl">Chained Acc · LR</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-num">68.3%</div>
+        <div class="stat-lbl">Chained Acc · RF</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-num" style="color:#15803d;">83.3%</div>
+        <div class="stat-lbl">Type 2 F1 · RF</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-num" style="color:#b45309;">206</div>
+        <div class="stat-lbl">Training samples</div>
       </div>
     </div>
     """)
 
-    # ── tabs ──
-    with gr.Tabs(elem_classes="tabs"):
+    with gr.Tabs():
 
-        # ──── SINGLE TAB ────
-        with gr.TabItem("Single Ticket", id="single"):
+        # ── Single ticket tab ─────────────────────────────────────────────────
+        with gr.TabItem("Single ticket"):
             with gr.Row(equal_height=False):
 
-                # left — inputs
                 with gr.Column(scale=5):
-                    with gr.Group(elem_classes="card"):
-                        gr.HTML('<div class="card-title">Ticket details</div>')
-                        summary_in = gr.Textbox(
-                            label="Summary",
-                            placeholder="Brief description of the issue…",
-                            lines=1,
-                            container=False,
-                        )
-                        content_in = gr.Textbox(
-                            label="Description",
-                            placeholder="Detailed explanation of the customer's problem…",
-                            lines=7,
-                            container=False,
-                        )
-                        gr.HTML('<div style="height:6px;"></div>')
-                        with gr.Row():
-                            model_single = gr.Radio(
-                                choices=list(CLASSIFIERS.keys()),
-                                value="Random Forest",
-                                label="Model",
-                                container=False,
-                                scale=2,
-                            )
-                            btn = gr.Button(
-                                "Analyse ticket",
-                                variant="primary",
-                                elem_classes="btn-primary",
-                                scale=1,
-                            )
-                        gr.HTML('<div style="height:6px;"></div>')
-                        gr.Examples(
-                            examples=[
-                                ["Refund request",
-                                 "I paid for an app but it did not work. Please help me get a refund."],
-                                ["Subscription cancellation",
-                                 "I want to cancel my subscription and stop future payments."],
-                                ["Login issue",
-                                 "I cannot sign in to my account after changing my password."],
-                            ],
-                            inputs=[summary_in, content_in],
-                            label="Try an example",
-                        )
+                    gr.HTML('<div class="surface">')
+                    gr.HTML('<div class="section-label">Ticket details</div>')
+                    summary_in = gr.Textbox(
+                        label="Summary",
+                        placeholder="Brief one-line description…",
+                        lines=1,
+                    )
+                    content_in = gr.Textbox(
+                        label="Description",
+                        placeholder="Paste the full customer message here…",
+                        lines=7,
+                    )
+                    gr.HTML('<div class="divider"></div>')
+                    model_single = gr.Radio(
+                        choices=list(CLASSIFIERS.keys()),
+                        value="Random Forest",
+                        label="Model",
+                    )
+                    btn = gr.Button("Analyse ticket", variant="primary", elem_id="analyse-btn")
+                    gr.HTML('</div>')
 
-                # right — results
+                    gr.HTML('<div style="height:12px;"></div>')
+
+                    gr.HTML('<div class="surface" style="padding:16px 20px;">')
+                    gr.HTML('<div class="section-label" style="margin-bottom:10px;">Quick examples</div>')
+                    gr.Examples(
+                        examples=[
+                            ["Refund request", "I paid for an app but it did not work. Please help me get a refund."],
+                            ["Subscription cancellation", "I want to cancel my subscription and stop future payments."],
+                            ["Login issue", "I cannot sign in to my account after changing my password."],
+                        ],
+                        inputs=[summary_in, content_in],
+                        label=None,
+                    )
+                    gr.HTML('</div>')
+
                 with gr.Column(scale=5):
-                    with gr.Group(elem_classes="results-panel"):
-                        gr.HTML("""
-                        <div class="results-header">
-                          <span class="title">Predictions</span>
-                          <span class="badge">confidence</span>
-                        </div>
-                        """)
-                        y2_out = gr.HTML(value=EMPTY_CARD)
-                        y3_out = gr.HTML()
-                        y4_out = gr.HTML()
-                        meta_out = gr.HTML()
-                        gr.HTML("""
-                        <div class="legend">
-                          <span class="legend-item"><span class="legend-dot" style="background:#059669;"></span>≥ 70% High</span>
-                          <span class="legend-item"><span class="legend-dot" style="background:#d97706;"></span>40–70% Medium</span>
-                          <span class="legend-item"><span class="legend-dot" style="background:#dc2626;"></span>&lt; 40% Low</span>
-                        </div>
-                        """)
+                    gr.HTML('<div class="surface" style="min-height:340px;">')
+                    gr.HTML('<div class="section-label">Predictions</div>')
+                    y2_out = gr.HTML(value=EMPTY_CARD)
+                    y3_out = gr.HTML()
+                    y4_out = gr.HTML()
+                    meta_out = gr.HTML()
+                    gr.HTML("""
+                    <div class="conf-legend">
+                      <span><i style="background:#22c55e;"></i>≥ 70% High</span>
+                      <span><i style="background:#f59e0b;"></i>40–70% Medium</span>
+                      <span><i style="background:#ef4444;"></i>&lt; 40% Low</span>
+                    </div>
+                    """)
+                    gr.HTML('</div>')
 
             btn.click(
                 classify_single,
@@ -591,48 +491,38 @@ with gr.Blocks(
                 outputs=[y2_out, y3_out, y4_out, meta_out],
             )
 
-        # ──── BATCH TAB ────
-        with gr.TabItem("Batch CSV", id="batch"):
+        # ── Batch tab ─────────────────────────────────────────────────────────
+        with gr.TabItem("Batch CSV"):
             gr.HTML("""
-            <div style="background:#f8fafc;border-radius:8px;padding:14px 18px;margin-bottom:16px;
-                        border:1px solid #e5e7eb;font-size:13px;color:#4b5563;line-height:1.6;">
-              Upload a CSV with columns <strong>Ticket Summary</strong> and <strong>Interaction content</strong>.
-              Results include confidence scores for all three prediction levels.
-              <span style="color:#9ca3af;font-size:12px;margin-left:8px;">
-                (optional: <code>message_id</code> is preserved)
-              </span>
+            <div style="font-family:'Geist',sans-serif;font-size:14px;color:#5c5750;
+                        line-height:1.65;margin-bottom:20px;font-weight:300;">
+              Upload a CSV with <strong style="color:#1a1816;font-weight:600;">Ticket Summary</strong>
+              and <strong style="color:#1a1816;font-weight:600;">Interaction content</strong> columns.
+              An optional <code style="font-family:'DM Mono',monospace;font-size:12px;
+              background:#efece8;padding:1px 6px;border-radius:4px;">message_id</code> column is preserved.
             </div>
             """)
+
             with gr.Row(equal_height=False):
                 with gr.Column(scale=4):
-                    with gr.Group(elem_classes="card"):
-                        gr.HTML('<div class="card-title">Upload data</div>')
-                        csv_in = gr.File(
-                            label="CSV file",
-                            file_types=[".csv"],
-                            container=False,
-                        )
-                        gr.HTML('<div style="height:8px;"></div>')
-                        model_batch = gr.Radio(
-                            choices=list(CLASSIFIERS.keys()),
-                            value="Random Forest",
-                            label="Model",
-                            container=False,
-                        )
-                        gr.HTML('<div style="height:10px;"></div>')
-                        run_btn = gr.Button(
-                            "Run batch prediction",
-                            variant="primary",
-                            elem_classes="btn-primary",
-                        )
+                    gr.HTML('<div class="surface">')
+                    gr.HTML('<div class="section-label">Upload</div>')
+                    csv_in = gr.File(label="CSV file", file_types=[".csv"])
+                    gr.HTML('<div class="divider"></div>')
+                    model_batch = gr.Radio(
+                        choices=list(CLASSIFIERS.keys()),
+                        value="Random Forest",
+                        label="Model",
+                    )
+                    run_btn = gr.Button("Run batch prediction", variant="primary", elem_classes="run-btn")
+                    gr.HTML('</div>')
+
                 with gr.Column(scale=6):
-                    with gr.Group(elem_classes="card"):
-                        gr.HTML('<div class="card-title">Results</div>')
-                        status = gr.Markdown(
-                            value="Upload a CSV and click **Run batch prediction**.",
-                            elem_classes="batch-status",
-                        )
-                        csv_out = gr.File(label="Download predictions", interactive=False)
+                    gr.HTML('<div class="surface">')
+                    gr.HTML('<div class="section-label">Results</div>')
+                    status = gr.Markdown(value="Upload a CSV and click **Run batch prediction**.")
+                    csv_out = gr.File(label="Download predictions", interactive=False)
+                    gr.HTML('</div>')
 
             run_btn.click(
                 classify_batch,
@@ -640,11 +530,11 @@ with gr.Blocks(
                 outputs=[csv_out, status],
             )
 
-    # ── footer ──
     gr.HTML("""
-    <div style="text-align:center;padding:28px 0 8px;font-size:12px;color:#9ca3af;
-                border-top:1px solid #f1f5f9;margin-top:16px;letter-spacing:.02em;">
-      Hierarchical classifier · powered by scikit-learn
+    <div style="text-align:center;padding:32px 0 0;font-family:'DM Mono',monospace;
+                font-size:11px;color:#c8c4be;letter-spacing:.06em;
+                border-top:1px solid rgba(26,24,22,.07);margin-top:32px;">
+      HIERARCHICAL CLASSIFIER · SCIKIT-LEARN · NCI DUBLIN
     </div>
     """)
 
