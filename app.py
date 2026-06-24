@@ -156,14 +156,27 @@ footer { display: none !important; }
     padding: 14px 10px;
     text-align: center;
 }
+input[type="text"], textarea, .gradio-container input[type="text"],
+.gradio-container textarea {
+    background-color: #ffffff !important;
+    color: #1e293b !important;
+    border-color: #e2e8f0 !important;
+}
+input[type="text"]::placeholder, textarea::placeholder { color: #94a3b8 !important; }
+/* Labels and radio option text */
+.gradio-container label > span,
+.gradio-container .label-wrap span { color: #1e293b !important; }
+/* Radio button items */
+.gradio-container .wrap .item span,
+.gradio-container input[type="radio"] + span { color: #1e293b !important; }
+/* Ensure radio container background is light */
+.gradio-container .wrap { background: transparent !important; }
 """
 
 with gr.Blocks(
     title="Customer Support Ticket Classifier",
-    theme=gr.themes.Soft(
+    theme=gr.themes.Default(
         primary_hue=gr.themes.colors.violet,
-        secondary_hue=gr.themes.colors.sky,
-        neutral_hue=gr.themes.colors.slate,
         font=gr.themes.GoogleFont("Inter"),
     ),
     css=CSS,
@@ -272,24 +285,6 @@ with gr.Blocks(
         )
 
 
-if __name__ == "__main__":
-    demo.launch(
-        server_name="0.0.0.0",
-        server_port=7860,
-        show_api=False,
-        share=False,
-        ssr_mode=False,
-    )
-
-
-if __name__ == "__main__":
-    demo.launch(
-        server_name="0.0.0.0",
-        server_port=7860,
-        show_api=False,         share=False,
-        ssr_mode=False,
-
-    )
 if __name__ == "__main__":
     demo.launch(
         server_name="0.0.0.0",
