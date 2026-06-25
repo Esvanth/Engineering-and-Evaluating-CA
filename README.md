@@ -1,17 +1,5 @@
 ﻿---
-title: Customer Support Ticket Classifier
-emoji: "📊"
-colorFrom: blue
-colorTo: indigo
-sdk: gradio
-sdk_version: 5.29.0
-python_version: "3.11"
-app_file: app.py
-pinned: false
-license: mit
----
-
-# Customer Support Ticket Classifier
+Title: Customer Support Ticket Classifier
 
 A hierarchical multi-label classifier for customer-support tickets, built as a continuous assessment for the **MSc AI — Engineering and Evaluating AI Systems** module at **NCI**. It predicts three label levels using a chained cascade of classifiers:
 
