@@ -198,3 +198,53 @@
 2026-06-15 12:50:11 | INFO    | __main__ | Wrote C:\Users\esvan\Desktop\Eng and Eval Art Int Systems\EEAI_CA_Code\outputs\metrics.json
 2026-06-15 12:50:11 | INFO    | __main__ | Wrote error analysis table with 20 rows
 2026-06-15 12:50:11 | INFO    | __main__ | Training pipeline complete.
+2026-06-25 07:21:29 | INFO    | __main__ | ======================================================================
+2026-06-25 07:21:29 | INFO    | __main__ | Training pipeline start
+2026-06-25 07:21:29 | INFO    | __main__ | ======================================================================
+2026-06-25 07:21:29 | INFO    | __main__ | Data summary: {
+  "n_rows": 206,
+  "n_y1_classes": 2,
+  "y2_distribution": {
+    "Suggestion": 92,
+    "Problem/Fault": 79,
+    "Others": 35
+  },
+  "y3_distribution": {
+    "Payment": 57,
+    "__MISSING__": 35,
+    "Coupon/Gifts/Points Issues": 26,
+    "AppGallery-Install/Upgrade": 19,
+    "VIP / Offers / Promotions": 13,
+    "Third Party APPs": 11,
+    "General": 10,
+    "Payment issue": 10,
+    "AppGallery-Use": 9,
+    "Invoice": 8
+  },
+  "y4_distribution": {
+    "Subscription cancellation": 52,
+    "__MISSING__": 43,
+    "Can't use or acquire": 19,
+    "Offers / Vouchers / Promotions": 13,
+    "Refund": 11,
+    "Can't install Apps": 9,
+    "Others": 8,
+    "Invoice related request": 8,
+    "Risk Control": 8,
+    "Cooperated campaign issue": 7
+  },
+  "missing_text_summary": 9,
+  "missing_text_content": 2
+}
+2026-06-25 07:21:31 | INFO    | __main__ | Split sizes: train=164 test=42
+2026-06-25 07:21:31 | INFO    | __main__ | ----------------------------------------------------------------------
+2026-06-25 07:21:31 | INFO    | __main__ | Training model: rf
+2026-06-25 07:21:31 | INFO    | __main__ | ----------------------------------------------------------------------
+2026-06-25 07:21:43 | INFO    | __main__ | Model rf | chained_acc=0.706 | y2_f1=0.851 | y3_f1=0.548 | y4_f1=0.542
+2026-06-25 07:21:43 | INFO    | __main__ | ----------------------------------------------------------------------
+2026-06-25 07:21:43 | INFO    | __main__ | Training model: lr
+2026-06-25 07:21:43 | INFO    | __main__ | ----------------------------------------------------------------------
+2026-06-25 07:21:46 | INFO    | __main__ | Model lr | chained_acc=0.694 | y2_f1=0.769 | y3_f1=0.583 | y4_f1=0.448
+2026-06-25 07:21:46 | INFO    | __main__ | Wrote C:\Users\esvan\Desktop\Eng and Eval Art Int Systems\EEAI_CA_Code\outputs\metrics.json
+2026-06-25 07:21:47 | INFO    | __main__ | Wrote error analysis table with 20 rows
+2026-06-25 07:21:47 | INFO    | __main__ | Training pipeline complete.

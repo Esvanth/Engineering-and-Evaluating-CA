@@ -160,4 +160,3 @@ Runs the unit tests for the chained accuracy metric, covering the five worked ex
 
 - Trained on only **206 samples** with an 80/20 split. Predictions on out-of-domain text will be unreliable.
 - The dataset covers only AppGallery and Purchasing ticket domains.
-- Academic prototype — not intended for production use.
