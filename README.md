@@ -1,6 +1,8 @@
 ﻿---
 Title: Customer Support Ticket Classifier
 
+Student ID: Esvanth Mohankumar - x24311073@student.ncirl.ie , Karthicksubramanian Muthukkaruppan - x25191489@student.ncirl.ie
+
 A hierarchical multi-label classifier for customer-support tickets, built as a continuous assessment for the **MSc AI — Engineering and Evaluating AI Systems** module at **NCI**. It predicts three label levels using a chained cascade of classifiers:
 
 | Level | Name | Examples |
